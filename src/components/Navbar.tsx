@@ -71,6 +71,26 @@ export default function Navbar() {
     { name: 'Inspiration', href: '/inspiration', icon: Sparkles },
   ];
 
+  // Helper function to check if path is active
+  const isActivePath = (href: string) => {
+    if (href === '/admin') {
+      return pathname === '/admin';
+    }
+    if (href === '/admin/orders') {
+      return pathname === '/admin/orders';
+    }
+    if (href === '/admin/products') {
+      return pathname === '/admin/products';
+    }
+    if (href === '/admin/discounts') {
+      return pathname === '/admin/discounts';
+    }
+    if (href === '/admin/inspirations') {
+      return pathname === '/admin/inspirations';
+    }
+    return pathname === href;
+  };
+
   // ============================================
   // ADMIN NAVBAR WITH HAMBURGER MENU (FIXED)
   // ============================================
@@ -98,10 +118,24 @@ export default function Navbar() {
             {/* Center: Desktop Navigation */}
             <nav className="hidden lg:flex space-x-3 xl:space-x-6 text-[10px] sm:text-xs font-semibold tracking-widest uppercase font-serif items-center">
               <Link
+                href="/admin"
+                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/admin')
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
+                  }`}
+              >
+                Dashboard
+                {pendingOrdersCount > 0 && (
+                  <span className="bg-red-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
+                    {pendingOrdersCount}
+                  </span>
+                )}
+              </Link>
+              <Link
                 href="/admin/orders"
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${pathname === '/admin/orders' || pathname === '/admin'
-                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                  : 'text-neutral-300'
+                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/admin/orders')
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                   }`}
               >
                 Orders
@@ -113,27 +147,27 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/admin/products"
-                className={`hover:text-white transition-colors py-1 ${pathname === '/admin/products'
-                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                  : 'text-neutral-300'
+                className={`hover:text-white transition-colors py-1 ${isActivePath('/admin/products')
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                   }`}
               >
                 Products
               </Link>
               <Link
                 href="/admin/discounts"
-                className={`hover:text-white transition-colors py-1 ${pathname === '/admin/discounts'
-                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                  : 'text-neutral-300'
+                className={`hover:text-white transition-colors py-1 ${isActivePath('/admin/discounts')
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                   }`}
               >
                 Discounts
               </Link>
               <Link
                 href="/admin/inspirations"
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${pathname === '/admin/inspirations'
-                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                  : 'text-neutral-300'
+                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/admin/inspirations')
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                   }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -179,10 +213,29 @@ export default function Navbar() {
           <div className="lg:hidden bg-[#1a1a1a] border-t border-[#c49a45]/20 py-3 px-4 sm:px-6 animate-fade-in">
             <nav className="flex flex-col space-y-1 text-sm font-semibold tracking-widest uppercase font-serif">
               <Link
+                href="/admin"
+                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/admin')
+                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="flex items-center gap-3">
+                  <Layers className="w-4 h-4" />
+                  Dashboard
+                </span>
+                {pendingOrdersCount > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center animate-pulse">
+                    {pendingOrdersCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
                 href="/admin/orders"
-                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${pathname === '/admin/orders' || pathname === '/admin'
-                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/admin/orders')
+                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -199,9 +252,9 @@ export default function Navbar() {
 
               <Link
                 href="/admin/products"
-                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${pathname === '/admin/products'
-                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/admin/products')
+                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -211,9 +264,9 @@ export default function Navbar() {
 
               <Link
                 href="/admin/discounts"
-                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${pathname === '/admin/discounts'
-                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/admin/discounts')
+                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -223,9 +276,9 @@ export default function Navbar() {
 
               <Link
                 href="/admin/inspirations"
-                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${pathname === '/admin/inspirations'
-                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/admin/inspirations')
+                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
