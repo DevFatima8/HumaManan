@@ -100,8 +100,8 @@ export default function Navbar() {
               <Link
                 href="/admin/orders"
                 className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${pathname === '/admin/orders' || pathname === '/admin'
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
+                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                  : 'text-neutral-300'
                   }`}
               >
                 Orders
@@ -114,8 +114,8 @@ export default function Navbar() {
               <Link
                 href="/admin/products"
                 className={`hover:text-white transition-colors py-1 ${pathname === '/admin/products'
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
+                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                  : 'text-neutral-300'
                   }`}
               >
                 Products
@@ -123,8 +123,8 @@ export default function Navbar() {
               <Link
                 href="/admin/discounts"
                 className={`hover:text-white transition-colors py-1 ${pathname === '/admin/discounts'
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
+                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                  : 'text-neutral-300'
                   }`}
               >
                 Discounts
@@ -132,8 +132,8 @@ export default function Navbar() {
               <Link
                 href="/admin/inspirations"
                 className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${pathname === '/admin/inspirations'
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
+                  ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                  : 'text-neutral-300'
                   }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -181,8 +181,8 @@ export default function Navbar() {
               <Link
                 href="/admin/orders"
                 className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${pathname === '/admin/orders' || pathname === '/admin'
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -200,8 +200,8 @@ export default function Navbar() {
               <Link
                 href="/admin/products"
                 className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${pathname === '/admin/products'
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -212,8 +212,8 @@ export default function Navbar() {
               <Link
                 href="/admin/discounts"
                 className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${pathname === '/admin/discounts'
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -224,8 +224,8 @@ export default function Navbar() {
               <Link
                 href="/admin/inspirations"
                 className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${pathname === '/admin/inspirations'
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -263,8 +263,8 @@ export default function Navbar() {
   // ============================================
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
-        ? 'bg-[#faf9f6]/98 backdrop-blur-md shadow-md'
-        : 'bg-[#faf9f6]/95 backdrop-blur-sm'
+      ? 'bg-[#faf9f6]/98 backdrop-blur-md shadow-md'
+      : 'bg-[#faf9f6]/95 backdrop-blur-sm'
       } border-b border-[#ebdcb9]/40`}>
 
       {/* Top Announcement Bar - Hidden on mobile */}
@@ -374,18 +374,6 @@ export default function Navbar() {
                   </Link>
                 );
               })}
-              <Link
-                href="/admin/orders"
-                className="text-neutral-400 hover:text-black text-[8px] lg:text-[10px] font-mono tracking-widest uppercase border-l border-neutral-300 pl-2 lg:pl-3 xl:pl-4 flex items-center gap-1.5"
-              >
-                <Layers className="w-3 h-3 lg:w-3.5 lg:h-3.5" />
-                <span className="hidden xl:inline">Console</span>
-                {pendingOrdersCount > 0 && (
-                  <span className="bg-red-500 text-white text-[7px] lg:text-[8px] font-bold rounded-full px-1.5 py-0.5 min-w-[14px] lg:min-w-[16px] text-center animate-pulse">
-                    {pendingOrdersCount}
-                  </span>
-                )}
-              </Link>
             </nav>
 
             {/* Mobile Currency Swapper */}
@@ -448,8 +436,8 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`py-2.5 px-3 rounded transition-colors flex items-center gap-3 ${isActive
-                      ? 'bg-[#ebdcb9]/30 text-[#c49a45] font-semibold'
-                      : 'hover:bg-neutral-100 hover:text-[#c49a45]'
+                    ? 'bg-[#ebdcb9]/30 text-[#c49a45] font-semibold'
+                    : 'hover:bg-neutral-100 hover:text-[#c49a45]'
                     }`}
                 >
                   {Icon && <Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
@@ -483,8 +471,8 @@ export default function Navbar() {
                 <button
                   onClick={() => { setCurrency('PKR'); setCurrencyDropdownOpen(false); }}
                   className={`px-2.5 py-1 rounded text-xs transition-colors ${currency === 'PKR'
-                      ? 'bg-[#c49a45] text-white'
-                      : 'bg-neutral-100 hover:bg-neutral-200'
+                    ? 'bg-[#c49a45] text-white'
+                    : 'bg-neutral-100 hover:bg-neutral-200'
                     }`}
                 >
                   PKR
@@ -492,8 +480,8 @@ export default function Navbar() {
                 <button
                   onClick={() => { setCurrency('USD'); setCurrencyDropdownOpen(false); }}
                   className={`px-2.5 py-1 rounded text-xs transition-colors ${currency === 'USD'
-                      ? 'bg-[#c49a45] text-white'
-                      : 'bg-neutral-100 hover:bg-neutral-200'
+                    ? 'bg-[#c49a45] text-white'
+                    : 'bg-neutral-100 hover:bg-neutral-200'
                     }`}
                 >
                   USD
