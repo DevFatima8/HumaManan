@@ -27,13 +27,25 @@ export default function AdminInspirationsPage() {
 
     const loadData = useCallback(async () => {
         setLoading(true);
-        await fetchInspirations();
-        setLoading(false);
+        try {
+            await fetchInspirations();
+        } finally {
+            setLoading(false);
+        }
     }, [fetchInspirations]);
 
     useEffect(() => {
-        queueMicrotask(() => loadData());
-    }, [loadData]);
+        let isMounted = true;
+        setLoading(true);
+        fetchInspirations().finally(() => {
+            if (isMounted) {
+                setLoading(false);
+            }
+        });
+        return () => {
+            isMounted = false;
+        };
+    }, [fetchInspirations]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
