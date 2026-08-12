@@ -92,7 +92,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="text-neutral-400 hover:text-[#c49a45] transition-colors">
+                <Link href="/ad/m/in" className="text-neutral-400 hover:text-[#c49a45] transition-colors">
                   Client Order Tracking Portal
                 </Link>
               </li>
@@ -146,7 +146,7 @@ export default function Footer() {
           <div className="flex gap-6">
             <Link href="/" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/admin" className="hover:text-white transition-colors">Management Portal</Link>
+            <Link href="/ad/m/in" className="hover:text-white transition-colors">Management Portal</Link>
           </div>
         </div>
       </div>

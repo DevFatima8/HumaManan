@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import {
   ShoppingBag,
@@ -19,7 +19,8 @@ import {
   ChevronDown,
   Home,
   Tag,
-  ShoppingBasket
+  ShoppingBasket,
+  LogOut
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -38,6 +39,13 @@ export default function Navbar() {
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('admin_user_email');
+    router.push('/ad/m/in/login');
+  };
 
   const totalCartItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -73,28 +81,29 @@ export default function Navbar() {
 
   // Helper function to check if path is active
   const isActivePath = (href: string) => {
-    if (href === '/admin') {
-      return pathname === '/admin';
+    if (href === '/ad/m/in') {
+      return pathname === '/ad/m/in';
     }
-    if (href === '/admin/orders') {
-      return pathname === '/admin/orders';
+    if (href === '/ad/m/in/orders') {
+      return pathname === '/ad/m/in/orders';
     }
-    if (href === '/admin/products') {
-      return pathname === '/admin/products';
+    if (href === '/ad/m/in/products') {
+      return pathname === '/ad/m/in/products';
     }
-    if (href === '/admin/discounts') {
-      return pathname === '/admin/discounts';
+    if (href === '/ad/m/in/discounts') {
+      return pathname === '/ad/m/in/discounts';
     }
-    if (href === '/admin/inspirations') {
-      return pathname === '/admin/inspirations';
+    if (href === '/ad/m/in/inspirations') {
+      return pathname === '/ad/m/in/inspirations';
     }
     return pathname === href;
   };
 
   // ============================================
-  // ADMIN NAVBAR WITH HAMBURGER MENU (FIXED)
+  // ADMIN NAVBAR WITH HAMBURGER MENU & LOGOUT
   // ============================================
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/ad/m/in')) {
+    const isLoginPage = pathname === '/ad/m/in/login';
     return (
       <header className="sticky top-0 z-50 bg-[#121212] border-b border-[#c49a45]/30 text-[#f2e6d0] shadow-xl">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
@@ -102,7 +111,7 @@ export default function Navbar() {
 
             {/* Left: Branding */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/admin/orders" className="flex flex-col">
+              <Link href={isLoginPage ? "/" : "/ad/m/in"} className="flex flex-col">
                 <span className="font-serif text-base sm:text-lg tracking-[0.25em] text-white font-bold leading-none">
                   HUMA/MANAN
                 </span>
@@ -116,84 +125,87 @@ export default function Navbar() {
             </div>
 
             {/* Center: Desktop Navigation */}
-            <nav className="hidden lg:flex space-x-3 xl:space-x-6 text-[10px] sm:text-xs font-semibold tracking-widest uppercase font-serif items-center">
-              <Link
-                href="/admin"
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/admin')
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
-                  }`}
-              >
-                Dashboard
-                {pendingOrdersCount > 0 && (
-                  <span className="bg-red-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
-                    {pendingOrdersCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/admin/orders"
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/admin/orders')
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
-                  }`}
-              >
-                Orders
-                {pendingOrdersCount > 0 && (
-                  <span className="bg-red-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
-                    {pendingOrdersCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/admin/products"
-                className={`hover:text-white transition-colors py-1 ${isActivePath('/admin/products')
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
-                  }`}
-              >
-                Products
-              </Link>
-              <Link
-                href="/admin/discounts"
-                className={`hover:text-white transition-colors py-1 ${isActivePath('/admin/discounts')
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
-                  }`}
-              >
-                Discounts
-              </Link>
-              <Link
-                href="/admin/inspirations"
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/admin/inspirations')
-                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                    : 'text-neutral-300'
-                  }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                Inspirations
-                {pendingInspirationsCount > 0 && (
-                  <span className="bg-amber-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
-                    {pendingInspirationsCount}
-                  </span>
-                )}
-              </Link>
-            </nav>
+            {!isLoginPage && (
+              <nav className="hidden lg:flex space-x-3 xl:space-x-6 text-[10px] sm:text-xs font-semibold tracking-widest uppercase font-serif items-center">
+                <Link
+                  href="/ad/m/in"
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/ad/m/in')
+                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                      : 'text-neutral-300'
+                    }`}
+                >
+                  Dashboard
+                  {pendingOrdersCount > 0 && (
+                    <span className="bg-red-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
+                      {pendingOrdersCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  href="/ad/m/in/orders"
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/ad/m/in/orders')
+                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                      : 'text-neutral-300'
+                    }`}
+                >
+                  Orders
+                  {pendingOrdersCount > 0 && (
+                    <span className="bg-red-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
+                      {pendingOrdersCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  href="/ad/m/in/products"
+                  className={`hover:text-white transition-colors py-1 ${isActivePath('/ad/m/in/products')
+                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                      : 'text-neutral-300'
+                    }`}
+                >
+                  Products
+                </Link>
+                <Link
+                  href="/ad/m/in/discounts"
+                  className={`hover:text-white transition-colors py-1 ${isActivePath('/ad/m/in/discounts')
+                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                      : 'text-neutral-300'
+                    }`}
+                >
+                  Discounts
+                </Link>
+                <Link
+                  href="/ad/m/in/inspirations"
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/ad/m/in/inspirations')
+                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                      : 'text-neutral-300'
+                    }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Inspirations
+                  {pendingInspirationsCount > 0 && (
+                    <span className="bg-amber-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
+                      {pendingInspirationsCount}
+                    </span>
+                  )}
+                </Link>
+              </nav>
+            )}
 
             {/* Right: Actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Mobile Hamburger Menu Button for Admin */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden text-[#ebdcb9] hover:text-white transition-colors p-1.5"
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
-                ) : (
-                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
-                )}
-              </button>
+              {!isLoginPage && (
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="lg:hidden text-[#ebdcb9] hover:text-white transition-colors p-1.5"
+                  aria-label="Toggle menu"
+                >
+                  {mobileMenuOpen ? (
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                  ) : (
+                    <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+                  )}
+                </button>
+              )}
 
               {/* Back to Store Button */}
               <Link
@@ -203,18 +215,30 @@ export default function Navbar() {
                 <span className="hidden xs:inline">Back to Store</span>
                 <span className="xs:hidden">Store</span>
               </Link>
+
+              {/* Logout Button */}
+              {!isLoginPage && (
+                <button
+                  onClick={handleLogout}
+                  className="text-[9px] sm:text-xs uppercase font-serif tracking-[0.15em] bg-red-950/40 border border-red-500/40 hover:bg-red-900/60 hover:border-red-400 text-red-200 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap"
+                  title="Log out of Admin Console"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-red-400" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              )}
             </div>
 
           </div>
         </div>
 
         {/* Mobile Admin Navigation Drawer */}
-        {mobileMenuOpen && (
+        {mobileMenuOpen && !isLoginPage && (
           <div className="lg:hidden bg-[#1a1a1a] border-t border-[#c49a45]/20 py-3 px-4 sm:px-6 animate-fade-in">
             <nav className="flex flex-col space-y-1 text-sm font-semibold tracking-widest uppercase font-serif">
               <Link
-                href="/admin"
-                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/admin')
+                href="/ad/m/in"
+                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in')
                     ? 'bg-[#c49a45]/20 text-[#c49a45]'
                     : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
@@ -232,8 +256,8 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/admin/orders"
-                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/admin/orders')
+                href="/ad/m/in/orders"
+                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/orders')
                     ? 'bg-[#c49a45]/20 text-[#c49a45]'
                     : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
@@ -251,8 +275,8 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/admin/products"
-                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/admin/products')
+                href="/ad/m/in/products"
+                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/products')
                     ? 'bg-[#c49a45]/20 text-[#c49a45]'
                     : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
@@ -263,8 +287,8 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/admin/discounts"
-                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/admin/discounts')
+                href="/ad/m/in/discounts"
+                className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/discounts')
                     ? 'bg-[#c49a45]/20 text-[#c49a45]'
                     : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
@@ -275,8 +299,8 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/admin/inspirations"
-                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/admin/inspirations')
+                href="/ad/m/in/inspirations"
+                className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/inspirations')
                     ? 'bg-[#c49a45]/20 text-[#c49a45]'
                     : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
@@ -295,6 +319,18 @@ export default function Navbar() {
 
               {/* Divider */}
               <div className="border-t border-[#c49a45]/20 my-2" />
+
+              {/* Mobile Logout Button */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex items-center gap-3 px-3 py-3 rounded text-red-300 hover:bg-red-950/40 transition-colors w-full text-left font-serif"
+              >
+                <LogOut className="w-4 h-4 text-red-400" />
+                <span>Logout</span>
+              </button>
 
               {/* Back to Store in Mobile */}
               <Link
@@ -504,7 +540,7 @@ export default function Navbar() {
 
             {/* Console Gateway Link */}
             <Link
-              href="/admin/orders"
+              href="/ad/m/in/orders"
               onClick={() => setMobileMenuOpen(false)}
               className="py-2.5 px-3 rounded text-neutral-500 hover:bg-neutral-100 hover:text-black flex items-center gap-3 transition-colors"
             >

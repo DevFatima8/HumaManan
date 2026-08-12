@@ -1,4 +1,4 @@
-// src/app/admin/page.tsx
+// src/app/ad/m/in/page.tsx
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -425,7 +425,7 @@ export default function AdminDashboardPage() {
             </h3>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <Link
-                href="/admin/orders"
+                href="/ad/m/in/orders"
                 className="bg-[#faf9f6] border border-[#ebdcb9]/40 rounded-lg p-3 text-center hover:border-[#c49a45] transition-all group"
               >
                 <ShoppingBag className="w-6 h-6 text-[#c49a45] mx-auto mb-1" />
@@ -433,7 +433,7 @@ export default function AdminDashboardPage() {
                 <span className="text-[8px] text-neutral-400">{stats.totalOrders} orders</span>
               </Link>
               <Link
-                href="/admin/products"
+                href="/ad/m/in/products"
                 className="bg-[#faf9f6] border border-[#ebdcb9]/40 rounded-lg p-3 text-center hover:border-[#c49a45] transition-all group"
               >
                 <Package className="w-6 h-6 text-[#c49a45] mx-auto mb-1" />
@@ -441,7 +441,7 @@ export default function AdminDashboardPage() {
                 <span className="text-[8px] text-neutral-400">{stats.totalProducts} items</span>
               </Link>
               <Link
-                href="/admin/inspirations"
+                href="/ad/m/in/inspirations"
                 className="bg-[#faf9f6] border border-[#ebdcb9]/40 rounded-lg p-3 text-center hover:border-[#c49a45] transition-all group"
               >
                 <Sparkles className="w-6 h-6 text-[#c49a45] mx-auto mb-1" />
@@ -449,7 +449,7 @@ export default function AdminDashboardPage() {
                 <span className="text-[8px] text-neutral-400">{stats.pendingInspirations} pending</span>
               </Link>
               <Link
-                href="/admin/discounts"
+                href="/ad/m/in/discounts"
                 className="bg-[#faf9f6] border border-[#ebdcb9]/40 rounded-lg p-3 text-center hover:border-[#c49a45] transition-all group"
               >
                 <CircleDollarSign className="w-6 h-6 text-[#c49a45] mx-auto mb-1" />
@@ -503,7 +503,7 @@ export default function AdminDashboardPage() {
               <Clock className="w-5 h-5 text-[#c49a45]" />
               <span>Recent Orders</span>
             </h3>
-            <Link href="/admin/orders" className="text-[10px] text-[#c49a45] hover:underline flex items-center gap-1">
+            <Link href="/ad/m/in/orders" className="text-[10px] text-[#c49a45] hover:underline flex items-center gap-1">
               View All <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -557,7 +557,7 @@ export default function AdminDashboardPage() {
               <Sparkles className="w-5 h-5 text-[#c49a45]" />
               <span>Recent Inspirations</span>
             </h3>
-            <Link href="/admin/inspirations" className="text-[10px] text-[#c49a45] hover:underline flex items-center gap-1">
+            <Link href="/ad/m/in/inspirations" className="text-[10px] text-[#c49a45] hover:underline flex items-center gap-1">
               View All <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -635,7 +635,7 @@ export default function AdminDashboardPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Link
-              href="/admin/products"
+              href="/ad/m/in/products"
               className="px-6 py-2.5 bg-[#c49a45] hover:bg-[#121212] text-white text-xs uppercase tracking-widest font-serif font-bold transition-all rounded shadow-md"
             >
               Add First Product

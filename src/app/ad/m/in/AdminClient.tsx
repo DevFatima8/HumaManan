@@ -1,4 +1,4 @@
-// src/app/admin/AdminClient.tsx
+// src/app/ad/m/in/AdminClient.tsx
 "use client";
 
 import React, { useState } from 'react';
