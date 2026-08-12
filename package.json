@@ -17,6 +17,7 @@
     "mongoose": "^9.9.1",
     "multer": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
+    "mysql2": "^3.23.3",
     "next": "16.2.6",
     "pg": "8.20.0",
     "react": "19.2.6",

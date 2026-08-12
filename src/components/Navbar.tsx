@@ -38,6 +38,7 @@ export default function Navbar() {
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -219,8 +220,8 @@ export default function Navbar() {
               {/* Logout Button */}
               {!isLoginPage && (
                 <button
-                  onClick={handleLogout}
-                  className="text-[9px] sm:text-xs uppercase font-serif tracking-[0.15em] bg-red-950/40 border border-red-500/40 hover:bg-red-900/60 hover:border-red-400 text-red-200 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap"
+                  onClick={() => setShowLogoutModal(true)}
+                  className="text-[9px] sm:text-xs uppercase font-serif tracking-[0.15em] bg-red-950/40 border border-red-500/40 hover:bg-red-900/60 hover:border-red-400 text-red-200 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                   title="Log out of Admin Console"
                 >
                   <LogOut className="w-3.5 h-3.5 text-red-400" />
@@ -324,9 +325,9 @@ export default function Navbar() {
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  handleLogout();
+                  setShowLogoutModal(true);
                 }}
-                className="flex items-center gap-3 px-3 py-3 rounded text-red-300 hover:bg-red-950/40 transition-colors w-full text-left font-serif"
+                className="flex items-center gap-3 px-3 py-3 rounded text-red-300 hover:bg-red-950/40 transition-colors w-full text-left font-serif cursor-pointer"
               >
                 <LogOut className="w-4 h-4 text-red-400" />
                 <span>Logout</span>
@@ -341,6 +342,44 @@ export default function Navbar() {
                 <span className="text-xs">← Back to Store</span>
               </Link>
             </nav>
+          </div>
+        )}
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div className="bg-[#121212] border border-[#c49a45]/40 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center space-y-5">
+              <div className="w-14 h-14 rounded-full bg-red-950/60 border border-red-500/40 flex items-center justify-center mx-auto text-red-400">
+                <LogOut className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="font-serif text-lg tracking-[0.15em] text-white uppercase font-bold">
+                  Confirm Logout
+                </h3>
+                <p className="text-xs text-neutral-400 font-light mt-2 leading-relaxed">
+                  Are you sure you want to exit the Executive Suite console?
+                </p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 py-2.5 px-4 rounded-lg border border-[#c49a45]/30 text-[#ebdcb9] hover:bg-white/5 text-xs font-serif uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLogoutModal(false);
+                    handleLogout();
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-serif uppercase tracking-widest font-bold shadow-lg transition-all cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </header>

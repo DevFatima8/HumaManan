@@ -1,8 +1,45 @@
-// src/app/api/orders/route.ts
-import { NextResponse } from 'next/server';
-import { connectToDatabase } from 'lib/mongodb';
-import { Order } from 'models/Order';
+import { NextRequest, NextResponse } from 'next/server';
+import pool, { initDatabase, safeJsonParse } from 'lib/mysql';
 
+function formatOrderRow(row: any) {
+  return {
+    _id: row.id,
+    id: row.id,
+    customerName: row.customer_name,
+    customerEmail: row.customer_email,
+    customerPhone: row.customer_phone,
+    customerAddress: row.customer_address,
+    city: row.city,
+    country: row.country,
+    postalCode: row.postal_code,
+    totalAmount: Number(row.total_amount),
+    currency: row.currency,
+    paymentMethod: row.payment_method,
+    status: row.status,
+    items: safeJsonParse(row.items, []),
+    notes: row.notes || '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+// GET - Fetch all orders
+export async function GET() {
+  try {
+    await initDatabase();
+    const [rows]: any = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+    const orders = rows.map(formatOrderRow);
+    return NextResponse.json({ success: true, orders });
+  } catch (error: any) {
+    console.error('Error fetching orders from MySQL:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to fetch orders' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Create order
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -38,39 +75,42 @@ export async function POST(request: Request) {
       }
     }
 
-    // Connect to MongoDB
-    await connectToDatabase();
+    await initDatabase();
 
-    // Create order in MongoDB
-    const order = await Order.create({
-      customerName,
-      customerEmail,
-      customerPhone,
-      customerAddress,
-      city,
-      country,
-      postalCode: postalCode || 'N/A',
-      totalAmount: Number(totalAmount),
-      currency: currency || 'PKR',
-      paymentMethod: 'COD',
-      status: 'Pending',
-      items: items.map((item: any) => ({
-        ...item,
-        productId: String(item.productId) // Ensure string
-      })),
-      notes: notes || '',
-    });
+    const orderId = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
-    console.log('Order created successfully:', order._id);
+    await pool.query(
+      `INSERT INTO orders 
+      (id, customer_name, customer_email, customer_phone, customer_address, city, country, postal_code, total_amount, currency, payment_method, status, items, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        orderId,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        city,
+        country,
+        postalCode || 'N/A',
+        Number(totalAmount),
+        currency || 'PKR',
+        'COD',
+        'Pending',
+        JSON.stringify(items),
+        notes || '',
+      ]
+    );
+
+    console.log('Order created in MySQL:', orderId);
 
     return NextResponse.json({
       success: true,
-      orderId: order._id,
+      orderId: orderId,
       message: 'Order placed successfully!'
     });
 
   } catch (error: any) {
-    console.error('Error creating order:', error);
+    console.error('Error creating order in MySQL:', error);
     return NextResponse.json(
       { error: error.message || 'An error occurred while placing your luxury order.' },
       { status: 500 }
