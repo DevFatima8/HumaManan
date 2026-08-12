@@ -1,7 +1,7 @@
 // context/StoreContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product as ProductType } from '@/data/products';
 
 // Re-export Product type from products.ts
@@ -103,7 +103,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   // Fetch products from MongoDB
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch('/api/products');
       const data = await response.json();
@@ -119,10 +119,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error fetching products:', error);
     }
-  };
+  }, []);
 
   // Fetch discounts from MongoDB
-  const fetchDiscounts = async () => {
+  const fetchDiscounts = useCallback(async () => {
     try {
       const response = await fetch('/api/discounts');
       const data = await response.json();
@@ -132,10 +132,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error fetching discounts:', error);
     }
-  };
+  }, []);
 
   // Fetch inspirations from MongoDB
-  const fetchInspirations = async () => {
+  const fetchInspirations = useCallback(async () => {
     try {
       const response = await fetch('/api/inspiration');
       const data = await response.json();
@@ -147,13 +147,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error fetching inspirations:', error);
     }
-  };
+  }, []);
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     setLoading(true);
     await Promise.all([fetchProducts(), fetchDiscounts(), fetchInspirations()]);
     setLoading(false);
-  };
+  }, [fetchProducts, fetchDiscounts, fetchInspirations]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -174,7 +174,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         try { setOrdersList(JSON.parse(savedOrders)); } catch (e) { console.error(e); }
       }
     });
-  }, []);
+  }, [refreshData]);
 
   const saveCart = (newCart: CartItem[]) => {
     setCart(newCart);
@@ -239,7 +239,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   // PRODUCT CRUD with MongoDB
-  const addProduct = async (productData: any) => {
+  const addProduct = useCallback(async (productData: any) => {
     try {
       const response = await fetch('/api/products', {
         method: 'POST',
@@ -254,9 +254,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error adding product:', error);
       throw error;
     }
-  };
+  }, [refreshData]);
 
-  const updateProduct = async (productData: any) => {
+  const updateProduct = useCallback(async (productData: any) => {
     try {
       const response = await fetch('/api/products', {
         method: 'PUT',
@@ -271,9 +271,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error updating product:', error);
       throw error;
     }
-  };
+  }, [refreshData]);
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/products?id=${id}`, {
         method: 'DELETE',
@@ -286,10 +286,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error deleting product:', error);
       throw error;
     }
-  };
+  }, [refreshData]);
 
   // DISCOUNTS CRUD with MongoDB
-  const addDiscount = async (productId: string, percent: number) => {
+  const addDiscount = useCallback(async (productId: string, percent: number) => {
     try {
       const response = await fetch('/api/discounts', {
         method: 'POST',
@@ -304,9 +304,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error adding discount:', error);
       throw error;
     }
-  };
+  }, [fetchDiscounts]);
 
-  const deleteDiscount = async (productId: string) => {
+  const deleteDiscount = useCallback(async (productId: string) => {
     try {
       const response = await fetch(`/api/discounts?productId=${productId}`, {
         method: 'DELETE',
@@ -319,10 +319,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error deleting discount:', error);
       throw error;
     }
-  };
+  }, [fetchDiscounts]);
 
   // INSPIRATIONS CRUD with MongoDB
-  const updateInspirationStatus = async (id: string, status: string) => {
+  const updateInspirationStatus = useCallback(async (id: string, status: string) => {
     try {
       const response = await fetch('/api/inspiration', {
         method: 'PUT',
@@ -337,9 +337,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error updating inspiration:', error);
       throw error;
     }
-  };
+  }, [fetchInspirations]);
 
-  const deleteInspiration = async (id: string) => {
+  const deleteInspiration = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/inspiration?id=${id}`, {
         method: 'DELETE',
@@ -352,7 +352,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.error('Error deleting inspiration:', error);
       throw error;
     }
-  };
+  }, [fetchInspirations]);
 
   // ORDERS (keep localStorage for now, can migrate to MongoDB later)
   const addOrder = (orderData: Omit<Order, 'id'>) => {
