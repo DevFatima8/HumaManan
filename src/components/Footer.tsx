@@ -66,7 +66,7 @@ export default function Footer() {
               Inspired by the pure essence of timeless heritage. HUMA MANAN craft houses the most intricate bridal wear, formal maxis, and luxury sarees, designed with unmatched hand embellishments of traditional subcontinental karigari.
             </p>
             <div className="pt-2 text-xs text-[#c49a45] font-serif tracking-widest">
-              LAHORE • ISLAMABAD • DUBAI • NEW YORK
+              Gujrat • Lahore • Islamabad • Pakistan
             </div>
           </div>
 
@@ -89,11 +89,6 @@ export default function Footer() {
               <li>
                 <Link href="/category/Ready to Wear" className="text-neutral-400 hover:text-[#c49a45] transition-colors">
                   Ready to Wear
-                </Link>
-              </li>
-              <li>
-                <Link href="/ad/m/in" className="text-neutral-400 hover:text-[#c49a45] transition-colors">
-                  Client Order Tracking Portal
                 </Link>
               </li>
             </ul>
@@ -133,7 +128,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#c49a45] flex-shrink-0" />
-                <span className="text-neutral-400">contact@humamanan.com</span>
+                <span className="text-neutral-400">admin@humamanan.com</span>
               </li>
             </ul>
           </div>
