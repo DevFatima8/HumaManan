@@ -34,8 +34,8 @@ export default function AdminLoginPage() {
       } else {
         setError(data.error || 'Invalid Executive Credentials. Access Denied.');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Connection error. Unable to authenticate credentials.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Connection error. Unable to authenticate credentials.');
     } finally {
       setIsLoading(false);
     }

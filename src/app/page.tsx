@@ -158,7 +158,7 @@ export default function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white text-center">
-                <span className="font-serif italic text-xs text-[#ebdcb9]">"Heritage lives on in details that breathe romance."</span>
+                <span className="font-serif italic text-xs text-[#ebdcb9]">&quot;Heritage lives on in details that breathe romance.&quot;</span>
                 <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-400 mt-1">— Atelier Huma Manan</p>
               </div>
             </div>

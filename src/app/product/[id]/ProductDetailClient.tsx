@@ -21,17 +21,13 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const { currency, setCurrency, addToCart, discountsList } = useStore();
 
-  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedImageState, setSelectedImageState] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('M');
   const [quantity, setQuantity] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<'craft' | 'fabric' | 'shipping'>('craft');
 
-  // Initialize selectedImage with product's first image when product loads
-  useEffect(() => {
-    if (product?.images && product.images.length > 0) {
-      setSelectedImage(product.images[0]);
-    }
-  }, [product]);
+  const selectedImage = selectedImageState || (product?.images?.[0] || '');
+  const setSelectedImage = (img: string) => setSelectedImageState(img);
 
   // If no product, return null
   if (!product) {

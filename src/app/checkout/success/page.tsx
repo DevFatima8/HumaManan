@@ -26,19 +26,21 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isNaN(orderId)) {
-      const savedOrdersStr = localStorage.getItem('humamanan_orders') || '[]';
-      try {
-        const savedOrders = JSON.parse(savedOrdersStr);
-        const matched = savedOrders.find((o: any) => o.id === orderId);
-        if (matched) {
-          setOrder(matched);
+    queueMicrotask(() => {
+      if (!isNaN(orderId)) {
+        const savedOrdersStr = localStorage.getItem('humamanan_orders') || '[]';
+        try {
+          const savedOrders = JSON.parse(savedOrdersStr);
+          const matched = savedOrders.find((o: any) => o.id === orderId);
+          if (matched) {
+            setOrder(matched);
+          }
+        } catch (e) {
+          console.error("Failed to parse orders from localStorage", e);
         }
-      } catch (e) {
-        console.error("Failed to parse orders from localStorage", e);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
   }, [orderId]);
 
   if (loading) {
@@ -181,7 +183,7 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
               <p><strong className="text-neutral-800">Postal / Zip Code:</strong> {order.postalCode}</p>
               {order.notes && (
                 <div className="mt-4 p-3 bg-neutral-50 rounded border border-neutral-200 text-[11px] italic">
-                  <strong>Special Note:</strong> "{order.notes}"
+                  <strong>Special Note:</strong> &quot;{order.notes}&quot;
                 </div>
               )}
             </div>

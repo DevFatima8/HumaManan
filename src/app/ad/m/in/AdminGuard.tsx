@@ -15,24 +15,26 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     const authStatus = localStorage.getItem('admin_authenticated');
     const isLoginPage = pathname === '/ad/m/in/login';
 
-    if (authStatus === 'true') {
-      if (isLoginPage) {
-        // Already logged in, redirect away from login page to dashboard
-        router.replace('/ad/m/in');
-      } else {
-        setIsAuthorized(true);
-      }
-      setIsChecking(false);
-    } else {
-      if (isLoginPage) {
-        setIsAuthorized(false);
+    queueMicrotask(() => {
+      if (authStatus === 'true') {
+        if (isLoginPage) {
+          // Already logged in, redirect away from login page to dashboard
+          router.replace('/ad/m/in');
+        } else {
+          setIsAuthorized(true);
+        }
         setIsChecking(false);
       } else {
-        // Not logged in and trying to access protected route -> redirect to login
-        setIsAuthorized(false);
-        router.replace('/ad/m/in/login');
+        if (isLoginPage) {
+          setIsAuthorized(false);
+          setIsChecking(false);
+        } else {
+          // Not logged in and trying to access protected route -> redirect to login
+          setIsAuthorized(false);
+          router.replace('/ad/m/in/login');
+        }
       }
-    }
+    });
   }, [pathname, router]);
 
   // If on login page and not authenticated, render login page children

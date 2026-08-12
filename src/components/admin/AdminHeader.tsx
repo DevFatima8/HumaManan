@@ -32,13 +32,6 @@ export default function AdminHeader() {
     address: '',
   });
 
-  useEffect(() => {
-    // Only run on admin subpages (skip login page)
-    if (pathname !== '/ad/m/in/login') {
-      fetchAdminInfo();
-    }
-  }, [pathname]);
-
   const fetchAdminInfo = async () => {
     try {
       const res = await fetch('/api/admin/profile');
@@ -50,6 +43,13 @@ export default function AdminHeader() {
       console.warn('Could not load header admin profile info:', err);
     }
   };
+
+  useEffect(() => {
+    // Only run on admin subpages (skip login page)
+    if (pathname !== '/ad/m/in/login') {
+      queueMicrotask(() => fetchAdminInfo());
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_authenticated');

@@ -9,30 +9,19 @@ import { Bell, ShoppingBag, RefreshCw } from 'lucide-react';
 export default function AdminOrdersPage() {
   const { ordersList, refreshData } = useStore();
   const [loading, setLoading] = useState(true);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [pendingCount, setPendingCount] = useState(0);
 
   const loadOrders = async () => {
     setLoading(true);
     await refreshData();
-    const ordersData = ordersList || [];
-    setOrders(ordersData);
-    const pending = ordersData.filter((o: any) => o.status === 'Pending').length;
-    setPendingCount(pending);
     setLoading(false);
   };
 
   useEffect(() => {
-    loadOrders();
+    queueMicrotask(() => loadOrders());
   }, []);
 
-  useEffect(() => {
-    if (ordersList) {
-      setOrders(ordersList);
-      const pending = ordersList.filter((o: any) => o.status === 'Pending').length;
-      setPendingCount(pending);
-    }
-  }, [ordersList]);
+  const orders = ordersList || [];
+  const pendingCount = orders.filter((o: any) => o.status === 'Pending').length;
 
   if (loading) {
     return (
