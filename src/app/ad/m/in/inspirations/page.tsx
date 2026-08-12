@@ -1,7 +1,7 @@
 // src/app/ad/m/in/inspirations/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/context/StoreContext';
 import {
     Sparkles,
@@ -25,15 +25,15 @@ export default function AdminInspirationsPage() {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         await fetchInspirations();
         setLoading(false);
-    };
+    }, [fetchInspirations]);
+
+    useEffect(() => {
+        queueMicrotask(() => loadData());
+    }, [loadData]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -220,20 +220,34 @@ export default function AdminInspirationsPage() {
                     </div>
                 </div>
             </div>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#ebdcb9]/40 pb-6">
+                <div>
+                    <h1 className="font-serif text-2xl text-neutral-800 tracking-wider uppercase font-bold flex items-center gap-3">
+                        <Sparkles className="w-6 h-6 text-[#c49a45]" />
+                        Client Inspiration Moodboards
+                    </h1>
+                    <p className="text-xs text-neutral-500 mt-1 font-serif">
+                        Review custom design requests, uploaded moodboards, and client preferences
+                    </p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#ebdcb9]/20 px-3 py-1.5 rounded-full border border-[#c49a45]/30">
+                    <span className="text-xs font-serif text-neutral-700 font-medium">
+                        Total Submissions: <strong className="text-[#c49a45] font-bold">{inspirationsList.length}</strong>
+                    </span>
+                </div>
+            </div>
 
-            {/* Inspirations List */}
             {inspirationsList.length === 0 ? (
                 <div className="bg-white border border-[#ebdcb9]/40 rounded-lg p-16 text-center space-y-4">
                     <Sparkles className="w-12 h-12 text-[#c49a45] mx-auto opacity-40" />
                     <h3 className="font-serif text-lg text-neutral-700">No inspiration submissions yet</h3>
                     <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                        When clients submit their moodboards and design requests from the inspiration page, they'll appear here.
+                        When clients submit their moodboards and design requests from the inspiration page, they&apos;ll appear here.
                     </p>
                 </div>
             ) : (
                 <div className="space-y-4">
                     {inspirationsList.map((inspiration) => {
-                        // Filter valid images
                         const validImages = inspiration.images?.filter((img: string) => isValidImage(img)) || [];
                         const hasValidImages = validImages.length > 0;
 
@@ -244,9 +258,7 @@ export default function AdminInspirationsPage() {
                                     }`}
                             >
                                 <div className="p-4 sm:p-6">
-                                    {/* Header */}
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                        {/* Left: Client Info */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-3 flex-wrap">
                                                 <h3 className="font-serif text-base font-bold text-neutral-800">
@@ -267,13 +279,7 @@ export default function AdminInspirationsPage() {
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="w-3.5 h-3.5" />
-                                                    {new Date(inspiration.createdAt).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
+                                                    {new Date(inspiration.createdAt).toLocaleDateString()}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <ImageIcon className="w-3.5 h-3.5" />
@@ -283,14 +289,12 @@ export default function AdminInspirationsPage() {
 
                                             {inspiration.message && (
                                                 <div className="mt-3 p-3 bg-neutral-50 rounded border border-neutral-200 text-xs text-neutral-600 italic max-w-2xl">
-                                                    "{inspiration.message}"
+                                                    &quot;{inspiration.message}&quot;
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Right: Actions */}
                                         <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
-                                            {/* Status Dropdown */}
                                             <select
                                                 value={inspiration.status}
                                                 onChange={async (e) => {

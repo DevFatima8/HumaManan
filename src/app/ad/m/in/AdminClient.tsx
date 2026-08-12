@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { formatPrice } from '@/utils/format';
 import {
   Users,
@@ -181,12 +182,12 @@ export default function AdminClient({ initialOrders = [] }: AdminClientProps) {
             Once a client adds a dress, selects their currency, and finishes checkout, their Cash on Delivery booking will instantly record here.
           </p>
           <div className="pt-2">
-            <a
+            <Link
               href="/"
               className="inline-block px-6 py-2.5 bg-[#c49a45] hover:bg-[#121212] text-white text-xs uppercase tracking-widest font-serif font-bold transition-all rounded shadow-md"
             >
               Simulate Customer Shopping
-            </a>
+            </Link>
           </div>
         </div>
       ) : (
@@ -292,7 +293,7 @@ export default function AdminClient({ initialOrders = [] }: AdminClientProps) {
                           <Scissors className="w-3.5 h-3.5 text-[#c49a45]" />
                           <span>Custom Client Notes / Sizes</span>
                         </div>
-                        <p className="italic">"{order.notes}"</p>
+                        <p className="italic">&quot;{order.notes}&quot;</p>
                       </div>
                     )}
                   </div>

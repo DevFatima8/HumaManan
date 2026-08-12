@@ -29,7 +29,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
   // Set loading to false once product is found or productsList is loaded
   useEffect(() => {
     if (productsList.length > 0 || product !== null) {
-      setLoading(false);
+      queueMicrotask(() => setLoading(false));
     }
   }, [productsList, product]);
 

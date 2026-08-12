@@ -394,7 +394,7 @@ export default function InspirationPage() {
               </button>
 
               <p className="text-[9px] text-center text-neutral-400">
-                By submitting, you agree to our design consultation terms. We'll contact you within 24 hours.
+                By submitting, you agree to our design consultation terms. We&apos;ll contact you within 24 hours.
               </p>
             </form>
           </div>
@@ -407,7 +407,7 @@ export default function InspirationPage() {
               <Sparkles className="w-5 h-5 text-[#c49a45]" />
             </div>
             <h4 className="font-serif text-xs font-bold text-[#121212]">Custom Design</h4>
-            <p className="text-[10px] text-neutral-500 mt-1">We'll create a unique piece based on your vision</p>
+            <p className="text-[10px] text-neutral-500 mt-1">We&apos;ll create a unique piece based on your vision</p>
           </div>
 
           <div className="bg-white border border-[#ebdcb9]/40 rounded-lg p-4 text-center">

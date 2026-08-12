@@ -40,14 +40,6 @@ export default function AdminProductsPage() {
     return [];
   };
 
-  // Reset subcategory when category changes
-  useEffect(() => {
-    const subs = getSubcategories(category);
-    if (subs.length > 0 && !subs.includes(subcategory)) {
-      setSubcategory(subs[0]);
-    }
-  }, [category]);
-
   const showNotification = (msg: string, isError = false) => {
     setNotification(msg);
     setTimeout(() => setNotification(''), 4000);
@@ -388,7 +380,12 @@ export default function AdminProductsPage() {
                 <select
                   required
                   value={category}
-                  onChange={(e) => setCategory(e.target.value as 'Women' | 'Kids' | 'Men')}
+                  onChange={(e) => {
+                    const newCat = e.target.value as 'Women' | 'Kids' | 'Men';
+                    setCategory(newCat);
+                    const subs = getSubcategories(newCat);
+                    if (subs.length > 0) setSubcategory(subs[0]);
+                  }}
                   className="w-full bg-[#faf9f6] border border-[#ebdcb9]/50 rounded px-3 py-2 text-sm text-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#c49a45]"
                 >
                   <option value="Women">Women</option>
@@ -595,9 +592,9 @@ export default function AdminProductsPage() {
             </div>
           ) : (
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-              {productsList.map((product: any) => {
+              {productsList.map((product: any, idx: number) => {
                 // Get unique key - use _id from MongoDB or id from local data
-                const productKey = product._id || product.id || `product-${Math.random()}`;
+                const productKey = product._id || product.id || `product-${idx}`;
                 const isEditing = editingId === productKey;
 
                 return (

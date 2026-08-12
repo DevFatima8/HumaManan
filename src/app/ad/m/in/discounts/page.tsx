@@ -18,9 +18,11 @@ export default function AdminDiscountsPage() {
   useEffect(() => {
     if (productsList.length > 0 && !selectedProductId) {
       const firstProduct = productsList[0];
-      setSelectedProductId(String(firstProduct.id || firstProduct._id || ''));
+      queueMicrotask(() => {
+        setSelectedProductId(String(firstProduct.id || firstProduct._id || ''));
+      });
     }
-  }, [productsList]);
+  }, [productsList, selectedProductId]);
 
   const showNotification = (msg: string, isError: boolean = false) => {
     setNotification(msg);

@@ -53,12 +53,6 @@ export default function AdminProfileModal({
   const [formData, setFormData] = useState<AdminProfileData>({ ...currentAdmin });
   const [showUrlInput, setShowUrlInput] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchAdminProfile();
-    }
-  }, [isOpen]);
-
   const fetchAdminProfile = async () => {
     setLoading(true);
     setNotification(null);
@@ -75,6 +69,12 @@ export default function AdminProfileModal({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      queueMicrotask(() => fetchAdminProfile());
+    }
+  }, [isOpen]);
 
   const handleInputChange = (field: keyof AdminProfileData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

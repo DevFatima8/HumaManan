@@ -60,23 +60,11 @@ export default function AdminDashboardPage() {
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [recentInspirations, setRecentInspirations] = useState<any[]>([]);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    setLoading(true);
-    await refreshData();
-    calculateStats();
-    setLoading(false);
-  };
-
   const calculateStats = () => {
     const orders = ordersList || [];
     const products = productsList || [];
     const inspirations = inspirationsList || [];
 
-    // Order stats
     const totalOrders = orders.length;
     const pendingOrders = orders.filter((o: any) => o.status === 'Pending').length;
     const confirmedOrders = orders.filter((o: any) => o.status === 'Confirmed').length;
@@ -84,40 +72,33 @@ export default function AdminDashboardPage() {
     const dispatchedOrders = orders.filter((o: any) => o.status === 'Dispatched').length;
     const deliveredOrders = orders.filter((o: any) => o.status === 'Delivered').length;
 
-    // Revenue stats
     const pkrOrders = orders.filter((o: any) => o.currency === 'PKR');
     const usdOrders = orders.filter((o: any) => o.currency === 'USD');
 
     const pkrRevenue = pkrOrders.reduce((sum: number, o: any) => sum + o.totalAmount, 0);
     const usdRevenue = usdOrders.reduce((sum: number, o: any) => sum + o.totalAmount, 0);
-    const totalRevenue = pkrRevenue + (usdRevenue * 280); // Approximate conversion for display
+    const totalRevenue = pkrRevenue + (usdRevenue * 280);
 
-    // Average order value
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    // Total items sold
     const totalItemsSold = orders.reduce((sum: number, o: any) => {
       const items = o.items || [];
       return sum + items.reduce((s: number, item: any) => s + item.quantity, 0);
     }, 0);
 
-    // Inspiration stats
     const totalInspirations = inspirations.length;
     const pendingInspirations = inspirations.filter((i: any) => i.status === 'Pending').length;
 
-    // Recent orders (last 5)
     const sortedOrders = [...orders].sort((a: any, b: any) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     setRecentOrders(sortedOrders.slice(0, 5));
 
-    // Recent inspirations (last 5)
     const sortedInspirations = [...inspirations].sort((a: any, b: any) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     setRecentInspirations(sortedInspirations.slice(0, 5));
 
-    // Top products (by quantity sold)
     const productSales: Record<string, { name: string; quantity: number; revenue: number; image: string }> = {};
     orders.forEach((order: any) => {
       const items = order.items || [];
@@ -141,7 +122,6 @@ export default function AdminDashboardPage() {
       .slice(0, 5);
     setTopProducts(topProductsList);
 
-    // Calculate growth (mock - based on order count change)
     const lastMonthOrders = orders.filter((o: any) => {
       const date = new Date(o.createdAt);
       const now = new Date();
@@ -172,10 +152,21 @@ export default function AdminDashboardPage() {
       usdRevenue,
       averageOrderValue,
       totalItemsSold,
-      revenueGrowth: 15, // Mock value - can be calculated from actual data
+      revenueGrowth: 15,
       ordersGrowth
     });
   };
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    await refreshData();
+    calculateStats();
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    queueMicrotask(() => loadDashboardData());
+  }, []);
 
   if (loading) {
     return (

@@ -36,7 +36,6 @@ export default function Navbar() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
-  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
@@ -45,10 +44,12 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('admin_authenticated');
     localStorage.removeItem('admin_user_email');
+    setShowLogoutModal(false);
     router.push('/ad/m/in/login');
   };
 
   const totalCartItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const pendingOrdersCount = ordersList ? ordersList.filter((o: any) => o.status === 'Pending').length : 0;
 
   // Scroll effect for navbar
   useEffect(() => {
@@ -59,17 +60,9 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Get pending orders count
-  useEffect(() => {
-    if (ordersList) {
-      const pending = ordersList.filter((o: any) => o.status === 'Pending').length;
-      setPendingOrdersCount(pending);
-    }
-  }, [ordersList]);
-
   // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
+    queueMicrotask(() => setMobileMenuOpen(false));
   }, [pathname]);
 
   const navLinks = [

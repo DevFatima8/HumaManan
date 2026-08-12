@@ -156,22 +156,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    refreshData();
+    queueMicrotask(() => {
+      refreshData();
 
-    const savedCurrency = localStorage.getItem('humamanan_currency') as 'PKR' | 'USD';
-    if (savedCurrency === 'PKR' || savedCurrency === 'USD') {
-      setCurrencyState(savedCurrency);
-    }
+      const savedCurrency = localStorage.getItem('humamanan_currency') as 'PKR' | 'USD';
+      if (savedCurrency === 'PKR' || savedCurrency === 'USD') {
+        setCurrencyState(savedCurrency);
+      }
 
-    const savedCart = localStorage.getItem('humamanan_cart');
-    if (savedCart) {
-      try { setCart(JSON.parse(savedCart)); } catch (e) { console.error(e); }
-    }
+      const savedCart = localStorage.getItem('humamanan_cart');
+      if (savedCart) {
+        try { setCart(JSON.parse(savedCart)); } catch (e) { console.error(e); }
+      }
 
-    const savedOrders = localStorage.getItem('humamanan_orders');
-    if (savedOrders) {
-      try { setOrdersList(JSON.parse(savedOrders)); } catch (e) { console.error(e); }
-    }
+      const savedOrders = localStorage.getItem('humamanan_orders');
+      if (savedOrders) {
+        try { setOrdersList(JSON.parse(savedOrders)); } catch (e) { console.error(e); }
+      }
+    });
   }, []);
 
   const saveCart = (newCart: CartItem[]) => {

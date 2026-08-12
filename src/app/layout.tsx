@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className="bg-[#faf9f6] text-[#121212] antialiased selection:bg-[#ebdcb9] selection:text-[#121212]">
         <StoreProvider>
           <div className="flex flex-col min-h-screen">

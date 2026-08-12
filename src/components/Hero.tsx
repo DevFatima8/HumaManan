@@ -34,7 +34,7 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 bg-[#ebdcb9]/15 border border-[#ebdcb9]/30 px-3.5 py-1.5 rounded-full backdrop-blur-md">
           <Sparkles className="w-3.5 h-3.5 text-[#ebdcb9]" />
           <span className="text-[10px] text-[#f2e6d0] uppercase tracking-[0.25em] font-medium">
-            The Royal Bridal Edit '26
+            The Royal Bridal Edit &apos;26
           </span>
         </div>
 

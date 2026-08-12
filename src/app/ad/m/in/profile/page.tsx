@@ -42,10 +42,6 @@ export default function AdminProfilePage() {
   const [formData, setFormData] = useState<AdminProfileData>({ ...currentAdmin });
   const [showUrlInput, setShowUrlInput] = useState(false);
 
-  useEffect(() => {
-    fetchAdminProfile();
-  }, []);
-
   const fetchAdminProfile = async () => {
     setLoading(true);
     setNotification(null);
@@ -62,6 +58,10 @@ export default function AdminProfilePage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    queueMicrotask(() => fetchAdminProfile());
+  }, []);
 
   const handleInputChange = (field: keyof AdminProfileData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
