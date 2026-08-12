@@ -464,7 +464,7 @@ export default function CheckoutPage() {
               If you have any questions or would prefer to book directly on WhatsApp, feel free to tap our dedicated couture support lines.
             </p>
             <div className="flex flex-col gap-1.5 font-mono text-[11px] text-neutral-700">
-              <span>✦ WhatsApp: <strong>+92 300 011 2233</strong></span>
+              <span>✦ WhatsApp: <strong>+92 313 5793337</strong></span>
               <span>✦ Email: <strong>concierge@humamanan.com</strong></span>
             </div>
           </div>
