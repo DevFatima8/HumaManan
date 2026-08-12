@@ -204,13 +204,22 @@ export default function AdminDashboardPage() {
               Real-time overview of your couture business performance, orders, and client engagement.
             </p>
           </div>
-          <button
-            onClick={loadDashboardData}
-            className="px-4 py-2 border border-[#c49a45]/30 rounded text-xs text-[#ebdcb9] hover:bg-white/10 transition-colors flex items-center gap-1.5 font-semibold font-serif uppercase cursor-pointer"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh Data</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/ad/m/in/profile"
+              className="px-4 py-2 border border-[#c49a45]/30 rounded text-xs text-[#ebdcb9] hover:bg-white/10 transition-colors flex items-center gap-1.5 font-semibold font-serif uppercase cursor-pointer"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Admin Profile</span>
+            </Link>
+            <button
+              onClick={loadDashboardData}
+              className="px-4 py-2 border border-[#c49a45]/30 rounded text-xs text-[#ebdcb9] hover:bg-white/10 transition-colors flex items-center gap-1.5 font-semibold font-serif uppercase cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh Data</span>
+            </button>
+          </div>
         </div>
       </div>
 

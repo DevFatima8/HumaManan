@@ -24,10 +24,6 @@ export default function AdminProductsPage() {
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [isFeatured, setIsFeatured] = useState(false);
 
-  // Edit Mode States
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<any>({});
-
   const [notification, setNotification] = useState('');
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -159,39 +155,115 @@ export default function AdminProductsPage() {
     }
   };
 
+  // Edit Mode States
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<any>({});
+  const [editUrlInput, setEditUrlInput] = useState('');
+  const [editUploading, setEditUploading] = useState(false);
+
   const startEditing = (p: any) => {
     const productId = p._id || p.id; // Handle both MongoDB _id and regular id
     setEditingId(productId);
     setEditData({
-      name: p.name,
-      description: p.description,
-      category: p.category,
-      subcategory: p.subcategory,
-      pkrPrice: p.pkrPrice,
-      usdPrice: p.usdPrice,
-      fabric: p.fabric,
-      care: p.care,
-      embroidery: p.embroidery,
-      sku: p.sku,
-      isFeatured: p.isFeatured,
+      id: productId,
+      name: p.name || '',
+      sku: p.sku || '',
+      description: p.description || '',
+      category: p.category || 'Women',
+      subcategory: p.subcategory || '',
+      gender: p.gender || p.category || 'Women',
+      pkrPrice: p.pkrPrice || 0,
+      usdPrice: p.usdPrice || 0,
+      fabric: p.fabric || '',
+      care: p.care || '',
+      embroidery: p.embroidery || '',
+      isFeatured: Boolean(p.isFeatured),
+      discountPercent: p.discountPercent || 0,
+      images: Array.isArray(p.images) ? [...p.images] : [],
+      sizes: Array.isArray(p.sizes) ? [...p.sizes] : ['XS', 'S', 'M', 'L', 'XL'],
     });
+    setEditUrlInput('');
+  };
+
+  const handleEditImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const currentImages = editData.images || [];
+    if (currentImages.length + files.length > 10) {
+      showNotification('Maximum 10 images allowed!', true);
+      return;
+    }
+
+    setEditUploading(true);
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('file', files[i]);
+    }
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      const data = await response.json();
+      if (data.success && data.url) {
+        setEditData((prev: any) => ({
+          ...prev,
+          images: [...(prev.images || []), data.url],
+        }));
+        showNotification('Image uploaded and added to product!');
+      }
+    } catch (error) {
+      console.error('Edit upload error:', error);
+      showNotification('Failed to upload image', true);
+    } finally {
+      setEditUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const removeEditImage = (index: number) => {
+    setEditData((prev: any) => ({
+      ...prev,
+      images: (prev.images || []).filter((_: any, i: number) => i !== index),
+    }));
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingId) return;
 
+    if (!editData.name?.trim()) {
+      showNotification('Please enter product name', true);
+      return;
+    }
+    if (!editData.sku?.trim()) {
+      showNotification('Please enter SKU', true);
+      return;
+    }
+    if (!editData.images || editData.images.length === 0) {
+      showNotification('Product must have at least 1 image', true);
+      return;
+    }
+
+    setLoading(true);
     try {
       await updateProduct({
         id: editingId,
         ...editData,
         pkrPrice: Number(editData.pkrPrice),
         usdPrice: Number(editData.usdPrice),
+        discountPercent: Number(editData.discountPercent || 0),
       });
       setEditingId(null);
       showNotification(`✅ "${editData.name}" updated successfully!`);
-    } catch (error) {
-      showNotification('Failed to update product', true);
+    } catch (error: any) {
+      showNotification(error.message || 'Failed to update product', true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -536,47 +608,124 @@ export default function AdminProductsPage() {
                   >
                     {isEditing ? (
                       /* EDIT FORM */
-                      <form onSubmit={handleSaveEdit} className="space-y-3">
+                      <form onSubmit={handleSaveEdit} className="space-y-3 bg-white p-3 rounded border border-[#c49a45]/40 shadow-sm">
+                        <div className="flex items-center justify-between border-b pb-2 mb-1">
+                          <h3 className="text-xs font-serif font-bold text-[#121212] uppercase tracking-wider">
+                            Editing Product: {editData.name || 'Untitled'}
+                          </h3>
+                          <span className="text-[9px] font-mono bg-[#c49a45]/15 text-[#c49a45] px-1.5 py-0.5 rounded uppercase font-bold">
+                            {editData.sku}
+                          </span>
+                        </div>
+
+                        {/* Images Editing Section */}
+                        <div className="bg-neutral-50 p-2.5 rounded border border-neutral-200 space-y-2">
+                          <label className="text-[9px] uppercase text-neutral-600 font-bold block">
+                            Product Images (Max 10) *
+                          </label>
+
+                          <div className="flex flex-wrap gap-2">
+                            {(editData.images || []).map((imgUrl: string, idx: number) => (
+                              <div key={idx} className="relative w-14 h-16 rounded overflow-hidden border border-[#ebdcb9] bg-white group flex-shrink-0">
+                                <img src={imgUrl} alt={`Product thumbnail ${idx}`} className="w-full h-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => removeEditImage(idx)}
+                                  className="absolute top-0 right-0 bg-red-600 text-white rounded-bl p-0.5 hover:bg-red-700 transition-colors"
+                                  title="Remove Image"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+
+                            {(editData.images || []).length < 10 && (
+                              <label className="w-14 h-16 rounded border-2 border-dashed border-[#c49a45]/50 flex flex-col items-center justify-center cursor-pointer hover:border-[#c49a45] transition-colors bg-white flex-shrink-0">
+                                {editUploading ? (
+                                  <div className="w-4 h-4 border-2 border-[#c49a45] border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <>
+                                    <UploadCloud className="w-4 h-4 text-[#c49a45]" />
+                                    <span className="text-[8px] font-serif text-[#c49a45] font-bold mt-0.5">+ Image</span>
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple
+                                  onChange={handleEditImageUpload}
+                                  className="hidden"
+                                />
+                              </label>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2 items-center pt-1">
+                            <input
+                              type="url"
+                              value={editUrlInput}
+                              onChange={(e) => setEditUrlInput(e.target.value)}
+                              placeholder="Paste image URL..."
+                              className="flex-1 bg-white border border-neutral-300 rounded px-2 py-1 text-[11px]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (editUrlInput.trim()) {
+                                  setEditData((prev: any) => ({
+                                    ...prev,
+                                    images: [...(prev.images || []), editUrlInput.trim()],
+                                  }));
+                                  setEditUrlInput('');
+                                }
+                              }}
+                              className="px-2.5 py-1 bg-[#121212] text-[#ebdcb9] hover:text-white text-[10px] rounded font-serif uppercase font-bold"
+                            >
+                              Add URL
+                            </button>
+                          </div>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">Name *</label>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Name *</label>
                             <input
                               type="text"
                               required
-                              value={editData.name}
+                              value={editData.name || ''}
                               onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                              className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">SKU *</label>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">SKU *</label>
                             <input
                               type="text"
                               required
-                              value={editData.sku}
+                              value={editData.sku || ''}
                               onChange={(e) => setEditData({ ...editData, sku: e.target.value })}
-                              className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">Description</label>
+                          <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Description</label>
                           <textarea
-                            value={editData.description}
+                            value={editData.description || ''}
                             onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                            className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                            className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             rows={2}
                           />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">Category</label>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Category</label>
                             <select
-                              value={editData.category}
-                              onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                              className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                              value={editData.category || 'Women'}
+                              onChange={(e) => setEditData({ ...editData, category: e.target.value, gender: e.target.value })}
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             >
                               <option value="Women">Women</option>
                               <option value="Kids">Kids</option>
@@ -584,60 +733,101 @@ export default function AdminProductsPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">Subcategory</label>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Subcategory</label>
                             <input
                               type="text"
-                              value={editData.subcategory}
+                              value={editData.subcategory || ''}
                               onChange={(e) => setEditData({ ...editData, subcategory: e.target.value })}
-                              className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">PKR Price</label>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Fabric</label>
+                            <input
+                              type="text"
+                              value={editData.fabric || ''}
+                              onChange={(e) => setEditData({ ...editData, fabric: e.target.value })}
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Care</label>
+                            <input
+                              type="text"
+                              value={editData.care || ''}
+                              onChange={(e) => setEditData({ ...editData, care: e.target.value })}
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Embroidery</label>
+                            <input
+                              type="text"
+                              value={editData.embroidery || ''}
+                              onChange={(e) => setEditData({ ...editData, embroidery: e.target.value })}
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">PKR Price</label>
                             <input
                               type="number"
-                              value={editData.pkrPrice}
+                              value={editData.pkrPrice || 0}
                               onChange={(e) => setEditData({ ...editData, pkrPrice: Number(e.target.value) })}
-                              className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] uppercase text-neutral-400 font-bold block mb-0.5">USD Price</label>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">USD Price</label>
                             <input
                               type="number"
-                              value={editData.usdPrice}
+                              value={editData.usdPrice || 0}
                               onChange={(e) => setEditData({ ...editData, usdPrice: Number(e.target.value) })}
-                              className="w-full bg-white border border-neutral-200 rounded px-2 py-1 text-xs"
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] uppercase text-neutral-500 font-bold block mb-0.5">Discount %</label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={editData.discountPercent || 0}
+                              onChange={(e) => setEditData({ ...editData, discountPercent: Number(e.target.value) })}
+                              className="w-full bg-white border border-neutral-300 rounded px-2 py-1 text-xs"
                             />
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                          <label className="flex items-center gap-1.5 text-[10px] text-neutral-600">
+                        <div className="flex items-center gap-4 pt-1">
+                          <label className="flex items-center gap-1.5 text-[10px] text-neutral-700 font-medium">
                             <input
                               type="checkbox"
-                              checked={editData.isFeatured}
+                              checked={Boolean(editData.isFeatured)}
                               onChange={(e) => setEditData({ ...editData, isFeatured: e.target.checked })}
-                              className="w-3.5 h-3.5"
+                              className="w-3.5 h-3.5 text-[#c49a45]"
                             />
-                            Featured
+                            Featured Product
                           </label>
                         </div>
 
-                        <div className="flex gap-2 justify-end pt-2">
+                        <div className="flex gap-2 justify-end pt-2 border-t border-neutral-200">
                           <button
                             type="button"
                             onClick={() => setEditingId(null)}
-                            className="px-3 py-1 text-[10px] uppercase font-serif tracking-widest text-neutral-500 hover:text-black"
+                            className="px-3 py-1.5 text-[10px] uppercase font-serif tracking-widest text-neutral-600 hover:text-black border border-neutral-300 rounded"
                           >
                             Cancel
                           </button>
                           <button
                             type="submit"
-                            className="px-3 py-1 text-[10px] uppercase font-serif tracking-widest bg-[#c49a45] text-white rounded hover:bg-[#a37e33]"
+                            className="px-4 py-1.5 text-[10px] uppercase font-serif tracking-widest bg-[#c49a45] text-white rounded font-bold hover:bg-[#a37e33] shadow"
                           >
                             Save Changes
                           </button>

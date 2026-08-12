@@ -92,6 +92,21 @@ export async function initDatabase() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
+    // 5. Admin table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS admin (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        image VARCHAR(500) DEFAULT '',
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(100) DEFAULT '',
+        email VARCHAR(255) NOT NULL UNIQUE,
+        pass VARCHAR(255) NOT NULL,
+        address TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
     connection.release();
     isInitialized = true;
     console.log('✅ Hostinger MySQL Database & Tables Initialized Successfully');

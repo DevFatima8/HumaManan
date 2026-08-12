@@ -1,12 +1,6 @@
 // lib/mongodb.ts
 import mongoose from 'mongoose';
 
-const MONGODB_URI: string = process.env.MONGODB_URI || '';
-
-if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
-
 // Define global mongoose cache
 interface MongooseCache {
     conn: typeof mongoose | null;
@@ -27,6 +21,13 @@ if (!global.mongoose) {
 }
 
 export async function connectToDatabase() {
+    const MONGODB_URI: string = process.env.MONGODB_URI || '';
+
+    if (!MONGODB_URI) {
+        console.warn('⚠️ MONGODB_URI environment variable is not defined.');
+        return null;
+    }
+
     if (cached.conn) {
         return cached.conn;
     }
@@ -47,7 +48,7 @@ export async function connectToDatabase() {
     } catch (e) {
         cached.promise = null;
         console.error('❌ MongoDB connection error:', e);
-        throw e;
+        return null;
     }
 
     return cached.conn;

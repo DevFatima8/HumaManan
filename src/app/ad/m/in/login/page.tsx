@@ -13,22 +13,32 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      // Validate credentials
-      if (email.trim() === 'admin@humamanan.com' && password === 'AHM@@123') {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         localStorage.setItem('admin_authenticated', 'true');
-        localStorage.setItem('admin_user_email', email.trim());
+        localStorage.setItem('admin_user_email', email.trim().toLowerCase());
         router.push('/ad/m/in');
       } else {
-        setError('Invalid Executive Credentials. Access Denied.');
-        setIsLoading(false);
+        setError(data.error || 'Invalid Executive Credentials. Access Denied.');
       }
-    }, 400);
+    } catch (err: any) {
+      setError(err?.message || 'Connection error. Unable to authenticate credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
