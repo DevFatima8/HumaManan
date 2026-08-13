@@ -23,13 +23,36 @@ function formatOrderRow(row: any) {
   };
 }
 
-// GET - Fetch all orders
-export async function GET() {
+// GET - Fetch all orders (with optional id or phone filter)
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const phone = searchParams.get('phone');
+
     await initDatabase();
-    const [rows]: any = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+
+    let query = 'SELECT * FROM orders';
+    const params: any[] = [];
+
+    if (id) {
+      query += ' WHERE id = ?';
+      params.push(id);
+    } else if (phone) {
+      query += ' WHERE customer_phone = ?';
+      params.push(phone);
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const [rows]: any = await pool.query(query, params);
     const orders = rows.map(formatOrderRow);
-    return NextResponse.json({ success: true, orders });
+
+    return NextResponse.json({
+      success: true,
+      orders,
+      order: orders.length > 0 ? orders[0] : null
+    });
   } catch (error: any) {
     console.error('Error fetching orders from MySQL:', error);
     return NextResponse.json(
@@ -113,6 +136,32 @@ export async function POST(request: Request) {
     console.error('Error creating order in MySQL:', error);
     return NextResponse.json(
       { error: error.message || 'An error occurred while placing your luxury order.' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Delete order
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Order ID is required' },
+        { status: 400 }
+      );
+    }
+
+    await initDatabase();
+    await pool.query('DELETE FROM orders WHERE id = ?', [id]);
+
+    return NextResponse.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting order in MySQL:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to delete order' },
       { status: 500 }
     );
   }

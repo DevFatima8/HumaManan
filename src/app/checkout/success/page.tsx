@@ -10,7 +10,9 @@ import {
   Calendar,
   MapPin,
   ShoppingBag,
-  ArrowRight
+  ArrowRight,
+  Trash2,
+  X
 } from 'lucide-react';
 
 interface SuccessPageProps {
@@ -19,29 +21,131 @@ interface SuccessPageProps {
 
 export default function SuccessPage({ searchParams }: SuccessPageProps) {
   const resolvedSearchParams = use(searchParams);
-  const orderIdStr = resolvedSearchParams.id;
-  const orderId = orderIdStr ? parseInt(orderIdStr, 10) : NaN;
+  const orderIdStr = resolvedSearchParams.id || '';
 
   const [order, setOrder] = useState<any>(null);
+  const [myOrdersHistory, setMyOrdersHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [orderToDelete, setOrderToDelete] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
-  useEffect(() => {
-    queueMicrotask(() => {
-      if (!isNaN(orderId)) {
-        const savedOrdersStr = localStorage.getItem('humamanan_orders') || '[]';
-        try {
-          const savedOrders = JSON.parse(savedOrdersStr);
-          const matched = savedOrders.find((o: any) => o.id === orderId);
-          if (matched) {
-            setOrder(matched);
-          }
-        } catch (e) {
-          console.error("Failed to parse orders from localStorage", e);
+  const confirmDeleteMyOrder = async () => {
+    if (!orderToDelete) return;
+    setIsDeleting(true);
+    try {
+      try {
+        await fetch(`/api/orders?id=${encodeURIComponent(orderToDelete.id)}`, { method: 'DELETE' });
+      } catch (e) {
+        console.error('API delete error:', e);
+      }
+
+      const myOrdersStr = localStorage.getItem('humamanan_my_orders') || '[]';
+      let myOrders = JSON.parse(myOrdersStr);
+      myOrders = myOrders.filter((o: any) => String(o.id) !== String(orderToDelete.id));
+      localStorage.setItem('humamanan_my_orders', JSON.stringify(myOrders));
+
+      const ordersStr = localStorage.getItem('humamanan_orders') || '[]';
+      let orders = JSON.parse(ordersStr);
+      orders = orders.filter((o: any) => String(o.id) !== String(orderToDelete.id));
+      localStorage.setItem('humamanan_orders', JSON.stringify(orders));
+
+      setMyOrdersHistory(myOrders);
+
+      if (String(orderToDelete.id) === String(order?.id)) {
+        if (myOrders.length > 0) {
+          setOrder(myOrders[0]);
+        } else {
+          setOrder(null);
         }
       }
+
+      setSuccessMsg(`Order #HM-${orderToDelete.id} removed from history.`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (err) {
+      console.error('Failed to delete order:', err);
+    } finally {
+      setIsDeleting(false);
+      setOrderToDelete(null);
+    }
+  };
+
+  useEffect(() => {
+    async function loadOrderData() {
+      setLoading(true);
+
+      // Load user's local order history
+      let localMyOrders: any[] = [];
+      const savedMyOrdersStr = localStorage.getItem('humamanan_my_orders');
+      if (savedMyOrdersStr) {
+        try { localMyOrders = JSON.parse(savedMyOrdersStr); } catch (e) { console.error(e); }
+      }
+
+      let allLocalOrders: any[] = [];
+      const savedOrdersStr = localStorage.getItem('humamanan_orders');
+      if (savedOrdersStr) {
+        try { allLocalOrders = JSON.parse(savedOrdersStr); } catch (e) { console.error(e); }
+      }
+
+      // Match requested order ID
+      let matched = null;
+      if (orderIdStr) {
+        matched = localMyOrders.find((o: any) => String(o.id) === String(orderIdStr) || String(o._id) === String(orderIdStr))
+          || allLocalOrders.find((o: any) => String(o.id) === String(orderIdStr) || String(o._id) === String(orderIdStr));
+
+        if (!matched) {
+          // Fetch order from API if not in local storage
+          try {
+            const res = await fetch(`/api/orders?id=${encodeURIComponent(orderIdStr)}`);
+            const data = await res.json();
+            if (data.success && (data.order || (data.orders && data.orders.length > 0))) {
+              matched = data.order || data.orders[0];
+            }
+          } catch (err) {
+            console.error("Failed to fetch order from API:", err);
+          }
+        }
+      }
+
+      // Fallback to latest local order if no ID specified or not matched
+      if (!matched && localMyOrders.length > 0) {
+        matched = localMyOrders[0];
+      }
+
+      if (matched) {
+        setOrder(matched);
+        if (!localMyOrders.some((o: any) => String(o.id) === String(matched.id))) {
+          localMyOrders.unshift(matched);
+          localStorage.setItem('humamanan_my_orders', JSON.stringify(localMyOrders));
+        }
+      }
+
+      // Fetch user's order history by saved phone if available
+      const userPhone = localStorage.getItem('humamanan_user_phone');
+      if (userPhone) {
+        try {
+          const res = await fetch(`/api/orders?phone=${encodeURIComponent(userPhone)}`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+            const merged = [...data.orders];
+            localMyOrders.forEach(lo => {
+              if (!merged.some(m => String(m.id) === String(lo.id))) {
+                merged.push(lo);
+              }
+            });
+            localMyOrders = merged;
+          }
+        } catch (e) {
+          console.error("Failed to fetch order history by phone:", e);
+        }
+      }
+
+      setMyOrdersHistory(localMyOrders);
       setLoading(false);
-    });
-  }, [orderId]);
+    }
+
+    loadOrderData();
+  }, [orderIdStr]);
 
   if (loading) {
     return (
@@ -52,14 +156,14 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
     );
   }
 
-  if (isNaN(orderId) || !order) {
+  if (!order) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-6">
         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
           <CheckCircle className="w-8 h-8" />
         </div>
         <h1 className="font-serif text-2xl">Order Not Found</h1>
-        <p className="text-xs text-neutral-500">Could not retrieve order verification details. Please contact support.</p>
+        <p className="text-xs text-neutral-500">Could not retrieve order verification details. Please contact support or place a new order.</p>
         <Link href="/" className="inline-block px-6 py-2.5 bg-[#c49a45] text-white text-xs uppercase tracking-widest font-serif rounded">
           Return to Home
         </Link>
@@ -230,6 +334,108 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
 
         </div>
 
+        {/* My Order History Section (Private to this user) */}
+        {myOrdersHistory.length > 0 && (
+          <div className="bg-white border border-[#ebdcb9]/40 rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-neutral-100 pb-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-neutral-800 tracking-wider flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-[#c49a45]" />
+                  <span>My Booking & Order History</span>
+                </h3>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Saved bookings associated with your device & contact profile
+                </p>
+              </div>
+              <span className="text-xs bg-[#ebdcb9]/30 text-[#856423] px-3 py-1 rounded-full font-mono font-semibold">
+                {myOrdersHistory.length} Total Booking{myOrdersHistory.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
+              {myOrdersHistory.map((ord: any) => {
+                const isCurrent = String(ord.id) === String(order.id);
+                return (
+                  <div
+                    key={ord.id}
+                    className={`p-4 rounded-lg border transition-all ${
+                      isCurrent
+                        ? 'border-[#c49a45] bg-[#ebdcb9]/10'
+                        : 'border-neutral-200 bg-neutral-50/50 hover:border-neutral-300'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-serif text-sm font-bold text-neutral-800">
+                            Reference: #HM-{ord.id}
+                          </span>
+                          {isCurrent && (
+                            <span className="bg-[#c49a45] text-white text-[9px] uppercase tracking-wider px-2 py-0.5 rounded font-serif font-bold">
+                              Viewing Now
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-neutral-400 font-mono block mt-0.5">
+                          Date: {new Date(ord.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2.5 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
+                          ord.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
+                          ord.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
+                          ord.status === 'Stitching' ? 'bg-purple-100 text-purple-800' :
+                          ord.status === 'Dispatched' ? 'bg-indigo-100 text-indigo-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {ord.status}
+                        </span>
+                        <span className="font-serif text-sm font-bold text-[#c49a45]">
+                          {formatPrice(ord.totalAmount, ord.currency as 'PKR' | 'USD')}
+                        </span>
+                        {!isCurrent && (
+                          <Link
+                            href={`/checkout/success?id=${ord.id}`}
+                            className="text-xs text-[#c49a45] hover:underline font-semibold flex items-center gap-0.5"
+                          >
+                            View Details
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setOrderToDelete(ord)}
+                          className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 border border-neutral-200 hover:border-red-300 rounded transition-all cursor-pointer flex items-center justify-center"
+                          title="Delete order from history"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {ord.items && ord.items.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-neutral-200/60 flex items-center gap-3 overflow-x-auto">
+                        {ord.items.map((it: any, idx: number) => (
+                          <div key={idx} className="flex items-center gap-2 flex-shrink-0 bg-white p-1.5 rounded border border-neutral-200">
+                            {it.image && (
+                              <img src={it.image} alt={it.name} className="w-6 h-8 object-cover rounded border border-neutral-100" />
+                            )}
+                            <div className="text-[10px]">
+                              <p className="font-serif font-bold text-neutral-800 truncate max-w-[120px]">{it.name}</p>
+                              <p className="text-neutral-400 font-mono">Qty: {it.quantity} • Size: {it.size}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Back Actions */}
         <div className="text-center pt-4">
           <Link
@@ -240,6 +446,78 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+
+        {/* Delete Order Modal */}
+        {orderToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+            <div className="bg-white border border-[#ebdcb9] rounded-lg shadow-2xl max-w-md w-full p-6 relative space-y-5">
+              <button
+                onClick={() => !isDeleting && setOrderToDelete(null)}
+                disabled={isDeleting}
+                className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-red-50 text-red-600 rounded-full border border-red-100 flex-shrink-0">
+                  <Trash2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-neutral-900">
+                    Delete Order #HM-{orderToDelete.id}?
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                    Are you sure you want to remove this booking from your history?
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-neutral-50 border border-neutral-200/80 rounded-md p-3.5 space-y-1 text-xs text-neutral-700 font-mono">
+                <div className="flex justify-between">
+                  <span className="text-neutral-500">Order Ref:</span>
+                  <span className="font-bold text-neutral-800">#HM-{orderToDelete.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-500">Total Amount:</span>
+                  <span className="font-bold text-[#c49a45]">
+                    {formatPrice(orderToDelete.totalAmount, orderToDelete.currency as 'PKR' | 'USD')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setOrderToDelete(null)}
+                  className="px-4 py-2 border border-neutral-300 rounded text-xs font-serif font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={confirmDeleteMyOrder}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-serif font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Order</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

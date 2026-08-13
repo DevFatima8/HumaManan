@@ -1,9 +1,10 @@
 // src/app/ad/m/in/AdminClient.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatPrice } from '@/utils/format';
+import { useStore } from '@/context/StoreContext';
 import {
   Users,
   CircleDollarSign,
@@ -14,7 +15,10 @@ import {
   Scissors,
   Phone,
   Mail,
-  MapPin
+  MapPin,
+  Trash2,
+  AlertTriangle,
+  X
 } from 'lucide-react';
 
 interface OrderItem {
@@ -50,9 +54,33 @@ interface AdminClientProps {
 }
 
 export default function AdminClient({ initialOrders = [] }: AdminClientProps) {
+  const { deleteOrder } = useStore();
   const [ordersList, setOrdersList] = useState<Order[]>(initialOrders || []);
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [updatingId, setUpdatingId] = useState<number | string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  useEffect(() => {
+    setOrdersList(initialOrders || []);
+  }, [initialOrders]);
+
+  const confirmDeleteOrder = async () => {
+    if (!orderToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteOrder(orderToDelete.id);
+      const updated = ordersList.filter(o => String(o.id) !== String(orderToDelete.id));
+      setOrdersList(updated);
+      setSuccessMessage(`Order #HM-${orderToDelete.id} has been deleted successfully!`);
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (err) {
+      console.error('Failed to delete order:', err);
+    } finally {
+      setIsDeleting(false);
+      setOrderToDelete(null);
+    }
+  };
 
   const handleStatusChange = (orderId: number, newStatus: string) => {
     setUpdatingId(orderId);
@@ -252,6 +280,16 @@ export default function AdminClient({ initialOrders = [] }: AdminClientProps) {
                         </div>
                       )}
                     </div>
+
+                    {/* Delete Trash Button */}
+                    <button
+                      type="button"
+                      onClick={() => setOrderToDelete(order)}
+                      className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 border border-neutral-200 hover:border-red-300 rounded transition-all cursor-pointer flex items-center justify-center"
+                      title="Delete Order"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
@@ -356,6 +394,86 @@ export default function AdminClient({ initialOrders = [] }: AdminClientProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-[#ebdcb9] rounded-lg shadow-2xl max-w-md w-full p-6 relative space-y-5">
+            {/* Close button */}
+            <button
+              onClick={() => !isDeleting && setOrderToDelete(null)}
+              disabled={isDeleting}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header icon + text */}
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-red-50 text-red-600 rounded-full border border-red-100 flex-shrink-0">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-serif text-lg font-bold text-neutral-900">
+                  Delete Order #HM-{orderToDelete.id}?
+                </h3>
+                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Are you sure you want to delete this client order? This action is permanent and cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {/* Order Info Summary */}
+            <div className="bg-neutral-50 border border-neutral-200/80 rounded-md p-3.5 space-y-1.5 text-xs text-neutral-700 font-mono">
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Client:</span>
+                <span className="font-bold text-neutral-800">{orderToDelete.customerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Phone:</span>
+                <span className="font-semibold text-neutral-800">{orderToDelete.customerPhone}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Total Amount:</span>
+                <span className="font-bold text-[#c49a45]">
+                  {formatPrice(orderToDelete.totalAmount, orderToDelete.currency as 'PKR' | 'USD')}
+                </span>
+              </div>
+            </div>
+
+            {/* Modal Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setOrderToDelete(null)}
+                className="px-4 py-2 border border-neutral-300 rounded text-xs font-serif font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={confirmDeleteOrder}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-serif font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Yes, Delete Order</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

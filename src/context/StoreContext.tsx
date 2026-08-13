@@ -75,6 +75,7 @@ interface StoreContextType {
   ordersList: Order[];
   addOrder: (order: Omit<Order, 'id'>) => number;
   updateOrderStatus: (orderId: number, status: string) => void;
+  deleteOrder: (orderId: number | string) => Promise<void>;
 
   discountsList: Discount[];
   addDiscount: (productId: string, percent: number) => Promise<void>;
@@ -370,6 +371,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('humamanan_orders', JSON.stringify(updated));
   };
 
+  const deleteOrder = useCallback(async (orderId: number | string) => {
+    try {
+      await fetch(`/api/orders?id=${orderId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Error deleting order via API:', error);
+    }
+    const updated = ordersList.filter(o => String(o.id) !== String(orderId));
+    setOrdersList(updated);
+    localStorage.setItem('humamanan_orders', JSON.stringify(updated));
+  }, [ordersList]);
+
   return (
     <StoreContext.Provider value={{
       currency,
@@ -392,6 +406,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ordersList,
       addOrder,
       updateOrderStatus,
+      deleteOrder,
 
       discountsList,
       addDiscount,

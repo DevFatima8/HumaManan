@@ -562,23 +562,7 @@ export default function Navbar() {
               );
             })}
 
-            {/* Divider */}
-            <div className="border-t border-neutral-200 my-2" />
 
-            {/* Console Gateway Link */}
-            <Link
-              href="/ad/m/in/orders"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-2.5 px-3 rounded text-neutral-500 hover:bg-neutral-100 hover:text-black flex items-center gap-3 transition-colors"
-            >
-              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Console Gateway</span>
-              {pendingOrdersCount > 0 && (
-                <span className="bg-red-500 text-white text-[8px] font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center animate-pulse">
-                  {pendingOrdersCount}
-                </span>
-              )}
-            </Link>
 
             {/* Mobile Currency Section */}
             <div className="mt-2 pt-2 border-t border-neutral-200 px-3 py-2">

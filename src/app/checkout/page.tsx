@@ -132,6 +132,19 @@ export default function CheckoutPage() {
       existingOrders.unshift(newOrder);
       localStorage.setItem('humamanan_orders', JSON.stringify(existingOrders));
 
+      // Save to user specific my orders history
+      try {
+        const myOrdersStr = localStorage.getItem('humamanan_my_orders') || '[]';
+        const myOrders = JSON.parse(myOrdersStr);
+        myOrders.unshift(newOrder);
+        localStorage.setItem('humamanan_my_orders', JSON.stringify(myOrders));
+      } catch (e) {
+        localStorage.setItem('humamanan_my_orders', JSON.stringify([newOrder]));
+      }
+
+      localStorage.setItem('humamanan_user_phone', customerPhone);
+      localStorage.setItem('humamanan_user_email', customerEmail);
+
       // Success! Clear cart and redirect
       clearCart();
       setSuccessMessage('Order placed successfully! Redirecting...');
