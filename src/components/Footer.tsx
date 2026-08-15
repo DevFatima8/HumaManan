@@ -118,7 +118,7 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#c49a45] flex-shrink-0" />
                 <span className="text-neutral-400">
-                  92-C, DHA Phase 5, Lahore, Pakistan <br />
+                  Gujrat <br />
                   <span className="text-[10px] text-neutral-500">(By Appointment Only)</span>
                 </span>
               </li>
@@ -138,10 +138,6 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-[#c49a45]/15 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-neutral-500 gap-4">
           <p>© {new Date().getFullYear()} HUMA MANAN Couture. All Rights Reserved.</p>
-          <div className="flex gap-6">
-            <Link href="/" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/" className="hover:text-white transition-colors">Terms of Service</Link>
-          </div>
         </div>
       </div>
     </footer>
