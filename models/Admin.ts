@@ -20,7 +20,7 @@ const AdminSchema = new Schema<IAdmin>(
         phone: { type: String, default: '+92 300 1234567' },
         email: { type: String, required: true, unique: true },
         pass: { type: String, required: true },
-        address: { type: String, default: 'Atelier 14, MM Alam Road, Gulberg III, Lahore, Pakistan' },
+        address: { type: String, default: 'Lahore, Gujrat, Pakistan' },
     },
     {
         timestamps: true,

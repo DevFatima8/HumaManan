@@ -66,7 +66,7 @@ export default function Footer() {
               Inspired by the pure essence of timeless heritage. HUMA MANAN craft houses the most intricate bridal wear, formal maxis, and luxury sarees, designed with unmatched hand embellishments of traditional subcontinental karigari.
             </p>
             <div className="pt-2 text-xs text-[#c49a45] font-serif tracking-widest">
-              Gujrat • Lahore • Islamabad • Pakistan
+              Lahore • Gujrat • Pakistan
             </div>
           </div>
 
@@ -118,7 +118,7 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#c49a45] flex-shrink-0" />
                 <span className="text-neutral-400">
-                  Gujrat <br />
+                  Gujrat, Lahore <br />
                   <span className="text-[10px] text-neutral-500">(By Appointment Only)</span>
                 </span>
               </li>
