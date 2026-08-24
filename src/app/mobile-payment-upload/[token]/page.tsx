@@ -77,7 +77,7 @@ export default function MobilePaymentUploadPage({ params }: MobileUploadPageProp
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) {
-      setUploadError('Please select or capture a payment receipt photo first.');
+      setUploadError('Please select a payment receipt screenshot first.');
       return;
     }
 
@@ -252,11 +252,11 @@ export default function MobilePaymentUploadPage({ params }: MobileUploadPageProp
               <form onSubmit={handleUploadSubmit} className="bg-white border border-[#ebdcb9] rounded-xl p-5 space-y-5 shadow-sm">
                 <div className="space-y-1">
                   <h3 className="font-serif text-sm font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-[#c49a45]" />
+                    <ImageIcon className="w-4 h-4 text-[#c49a45]" />
                     <span>Upload Bank Receipt Screenshot</span>
                   </h3>
                   <p className="text-xs text-neutral-500">
-                    Select a payment screenshot from your photo gallery or take a photo using your phone camera.
+                    Select a payment screenshot from your photo gallery.
                   </p>
                 </div>
 
@@ -266,14 +266,13 @@ export default function MobilePaymentUploadPage({ params }: MobileUploadPageProp
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/jpg"
-                      capture="environment"
                       onChange={handleFileChange}
                       className="hidden"
                     />
                     <div className="w-full py-3 px-4 border border-dashed border-[#c49a45]/60 hover:border-[#c49a45] bg-[#faf9f6] hover:bg-[#ebdcb9]/10 rounded-lg text-center transition-all space-y-1">
                       <div className="flex items-center justify-center gap-2 text-xs font-serif font-bold text-neutral-800 uppercase tracking-wider">
-                        <Camera className="w-4 h-4 text-[#c49a45]" />
-                        <span>Take Photo or Choose File</span>
+                        <ImageIcon className="w-4 h-4 text-[#c49a45]" />
+                        <span>Choose Screenshot from Gallery</span>
                       </div>
                       <p className="text-[10px] text-neutral-400">
                         Supports JPG, PNG, WEBP up to 10MB
