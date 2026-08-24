@@ -91,6 +91,11 @@ export default function Footer() {
                   Ready to Wear
                 </Link>
               </li>
+              <li>
+                <Link href="/order-history" className="text-[#c49a45] hover:text-white font-serif transition-colors flex items-center gap-1.5 pt-1">
+                  ✦ Order History & Tracking
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -100,6 +105,11 @@ export default function Footer() {
               Care & Service
             </h4>
             <ul className="space-y-2.5 text-xs text-neutral-400">
+              <li>
+                <Link href="/order-history" className="text-neutral-300 hover:text-[#c49a45] transition-colors underline decoration-[#c49a45]/40 underline-offset-4">
+                  Track Your Booking
+                </Link>
+              </li>
               <li>
                 <span className="text-[#c49a45]">✦ Professional Dry Cleaning Only</span>
               </li>

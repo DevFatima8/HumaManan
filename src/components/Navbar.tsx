@@ -20,7 +20,8 @@ import {
   Home,
   Tag,
   ShoppingBasket,
-  LogOut
+  LogOut,
+  PackageCheck
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -71,6 +72,7 @@ export default function Navbar() {
     { name: 'Kids', href: '/category/Kids', icon: Baby },
     { name: 'Men', href: '/category/Men', icon: UsersRound },
     { name: 'Inspiration', href: '/inspiration', icon: Sparkles },
+    { name: 'Order History', href: '/order-history', icon: PackageCheck },
   ];
 
   // Helper function to check if path is active
