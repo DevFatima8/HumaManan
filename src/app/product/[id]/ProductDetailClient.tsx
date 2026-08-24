@@ -267,7 +267,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
 
             <p className="text-[10px] text-center text-neutral-400 font-serif">
-              ✦ standard designer fits ✦ cash on delivery options
+              ✦ standard designer fits ✦ 30% advance or 100% bank transfer
             </p>
           </div>
 
@@ -295,7 +295,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               className={`pb-2.5 px-2 uppercase tracking-widest font-serif font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'shipping' ? 'border-[#c49a45] text-[#c49a45]' : 'border-transparent text-neutral-400'
                 }`}
             >
-              COD & Delivery
+              Payment & Delivery
             </button>
           </div>
 
@@ -322,7 +322,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   <Truck className="w-3.5 h-3.5 text-[#c49a45]" />
                   <span>Complimentary Shipping & Delivery Policy</span>
                 </p>
-                <p><strong>Pakistan Clients:</strong> Free shipping with Cash on Delivery (COD) available nationwide. Expected delivery within 15-20 business days.</p>
+                <p><strong>Bank Transfer Options:</strong> Direct Bank Transfer (30% Advance or 100% Full Payment) available with express delivery (15-20 business days).</p>
                 <p><strong>International Clients:</strong> Express shipping via DHL. Expected delivery time is 4-6 weeks.</p>
               </div>
             )}

@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool, { initDatabase, safeJsonParse } from 'lib/mysql';
 
 function formatOrderRow(row: any) {
+  const orderTotal = Number(row.order_total || row.total_amount || 0);
+  const payableAmount = row.payable_amount !== undefined && row.payable_amount !== null
+    ? Number(row.payable_amount)
+    : (row.payment_type === 'advance_30' ? Math.round(orderTotal * 0.3 * 100) / 100 : orderTotal);
+  const remainingAmount = row.remaining_amount !== undefined && row.remaining_amount !== null
+    ? Number(row.remaining_amount)
+    : (row.payment_type === 'advance_30' ? Math.round((orderTotal - payableAmount) * 100) / 100 : 0);
+
   return {
     _id: row.id,
     id: row.id,
@@ -12,9 +20,20 @@ function formatOrderRow(row: any) {
     city: row.city,
     country: row.country,
     postalCode: row.postal_code,
-    totalAmount: Number(row.total_amount),
+    totalAmount: orderTotal,
     currency: row.currency,
-    paymentMethod: row.payment_method,
+    paymentMethod: row.payment_method || 'Bank Transfer',
+    paymentType: row.payment_type || 'full_100',
+    orderTotal: orderTotal,
+    payableAmount: payableAmount,
+    remainingAmount: remainingAmount,
+    paymentStatus: row.payment_status || 'pending',
+    paymentScreenshot: row.payment_screenshot || '',
+    paymentSubmittedAt: row.payment_submitted_at,
+    paymentVerifiedAt: row.payment_verified_at,
+    paymentRejectedAt: row.payment_rejected_at,
+    paymentRejectionReason: row.payment_rejection_reason || '',
+    uploadSource: row.upload_source || 'web',
     status: row.status,
     items: safeJsonParse(row.items, []),
     notes: row.notes || '',
@@ -74,16 +93,28 @@ export async function POST(request: Request) {
       city,
       country,
       postalCode,
-      totalAmount,
-      currency,
+      currency = 'PKR',
       items,
-      notes
+      notes,
+      paymentMethod = 'Bank Transfer',
+      paymentType = 'full_100',
+      paymentScreenshot = '',
+      uploadSource = 'web',
+      paymentSessionToken = null,
     } = body;
 
     // Server-side validation
     if (!customerName || !customerEmail || !customerPhone || !customerAddress || !city || !country || !items || items.length === 0) {
       return NextResponse.json(
         { error: 'Please fill in all required shipping and contact fields.' },
+        { status: 400 }
+      );
+    }
+
+    // Require payment screenshot if Bank Transfer selected
+    if (paymentMethod === 'Bank Transfer' && !paymentScreenshot) {
+      return NextResponse.json(
+        { error: 'Please upload your payment screenshot to complete bank transfer booking.' },
         { status: 400 }
       );
     }
@@ -98,14 +129,42 @@ export async function POST(request: Request) {
       }
     }
 
+    // Server-side calculation of amounts (do not trust frontend inputs)
+    const calculatedTotal = items.reduce((sum: number, item: any) => {
+      const price = currency === 'USD' ? Number(item.usdPrice) : Number(item.pkrPrice);
+      return sum + (price * Number(item.quantity));
+    }, 0);
+
+    const finalTotal = calculatedTotal > 0 ? calculatedTotal : Number(body.totalAmount || 0);
+
+    let calculatedPayable = finalTotal;
+    let calculatedRemaining = 0;
+
+    if (paymentMethod === 'Bank Transfer' && paymentType === 'advance_30') {
+      calculatedPayable = Math.round(finalTotal * 0.30 * 100) / 100;
+      calculatedRemaining = Math.round((finalTotal - calculatedPayable) * 100) / 100;
+    } else if (paymentMethod === 'Bank Transfer' && paymentType === 'full_100') {
+      calculatedPayable = finalTotal;
+      calculatedRemaining = 0;
+    } else {
+      calculatedPayable = finalTotal;
+      calculatedRemaining = 0;
+    }
+
+    const initialPaymentStatus = paymentMethod === 'Bank Transfer'
+      ? (paymentScreenshot ? 'submitted' : 'pending')
+      : 'pending';
+
+    const submittedAt = paymentScreenshot ? new Date() : null;
+
     await initDatabase();
 
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
     await pool.query(
       `INSERT INTO orders 
-      (id, customer_name, customer_email, customer_phone, customer_address, city, country, postal_code, total_amount, currency, payment_method, status, items, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, customer_name, customer_email, customer_phone, customer_address, city, country, postal_code, total_amount, currency, payment_method, payment_type, order_total, payable_amount, remaining_amount, payment_status, payment_screenshot, payment_submitted_at, upload_source, status, items, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         orderId,
         customerName,
@@ -115,14 +174,29 @@ export async function POST(request: Request) {
         city,
         country,
         postalCode || 'N/A',
-        Number(totalAmount),
+        finalTotal,
         currency || 'PKR',
-        'COD',
+        paymentMethod,
+        paymentType,
+        finalTotal,
+        calculatedPayable,
+        calculatedRemaining,
+        initialPaymentStatus,
+        paymentScreenshot,
+        submittedAt,
+        uploadSource || 'web',
         'Pending',
         JSON.stringify(items),
         notes || '',
       ]
     );
+
+    if (paymentSessionToken) {
+      await pool.query(
+        "UPDATE payment_sessions SET status = 'completed', order_id = ? WHERE id = ?",
+        [orderId, paymentSessionToken]
+      );
+    }
 
     console.log('Order created in MySQL:', orderId);
 

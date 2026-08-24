@@ -37,8 +37,8 @@ export default function Footer() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-serif text-xs uppercase tracking-widest text-[#f2e6d0] font-semibold">Cash on Delivery</h4>
-              <p className="text-[11px] text-neutral-400 mt-0.5">COD checkout option available for immediate delivery within Pakistan.</p>
+              <h4 className="font-serif text-xs uppercase tracking-widest text-[#f2e6d0] font-semibold">Bank Transfer Options</h4>
+              <p className="text-[11px] text-neutral-400 mt-0.5">30% Advance or 100% Full Payment via Bank Transfer with express delivery.</p>
             </div>
           </div>
 

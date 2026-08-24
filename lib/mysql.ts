@@ -69,12 +69,64 @@ export async function initDatabase() {
         postal_code VARCHAR(50) DEFAULT 'N/A',
         total_amount DECIMAL(10,2) NOT NULL,
         currency VARCHAR(10) DEFAULT 'PKR',
-        payment_method VARCHAR(50) DEFAULT 'COD',
+        payment_method VARCHAR(50) DEFAULT 'Bank Transfer',
+        payment_type VARCHAR(20) DEFAULT 'full_100',
+        order_total DECIMAL(10,2) DEFAULT 0.00,
+        payable_amount DECIMAL(10,2) DEFAULT 0.00,
+        remaining_amount DECIMAL(10,2) DEFAULT 0.00,
+        payment_status VARCHAR(50) DEFAULT 'pending',
+        payment_screenshot VARCHAR(500) DEFAULT '',
+        payment_submitted_at DATETIME NULL,
+        payment_verified_at DATETIME NULL,
+        payment_rejected_at DATETIME NULL,
+        payment_rejection_reason TEXT NULL,
         status VARCHAR(50) DEFAULT 'Pending',
         items JSON NOT NULL,
         notes TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Ensure all payment columns exist on orders table if table already existed
+    const paymentColumns = [
+      { name: 'payment_type', type: "VARCHAR(20) DEFAULT 'full_100'" },
+      { name: 'order_total', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+      { name: 'payable_amount', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+      { name: 'remaining_amount', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+      { name: 'payment_status', type: "VARCHAR(50) DEFAULT 'pending'" },
+      { name: 'payment_screenshot', type: "VARCHAR(500) DEFAULT ''" },
+      { name: 'payment_submitted_at', type: 'DATETIME NULL' },
+      { name: 'payment_verified_at', type: 'DATETIME NULL' },
+      { name: 'payment_rejected_at', type: 'DATETIME NULL' },
+      { name: 'payment_rejection_reason', type: 'TEXT NULL' },
+      { name: 'upload_source', type: "VARCHAR(20) DEFAULT 'web'" },
+    ];
+
+    for (const col of paymentColumns) {
+      try {
+        await connection.query(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.type}`);
+      } catch (err: any) {
+        if (err.code !== 'ER_DUP_FIELDNAME') {
+          console.warn(`Migration note for ${col.name}:`, err.message);
+        }
+      }
+    }
+
+    // 4. Payment Sessions Table (for QR code mobile upload)
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS payment_sessions (
+        id VARCHAR(64) PRIMARY KEY,
+        order_id VARCHAR(64) NULL,
+        total_amount DECIMAL(10,2) NOT NULL,
+        payable_amount DECIMAL(10,2) NOT NULL,
+        payment_type VARCHAR(20) DEFAULT 'advance_30',
+        currency VARCHAR(10) DEFAULT 'PKR',
+        screenshot_url VARCHAR(500) DEFAULT '',
+        status VARCHAR(20) DEFAULT 'pending',
+        upload_source VARCHAR(20) DEFAULT 'mobile_qr',
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 

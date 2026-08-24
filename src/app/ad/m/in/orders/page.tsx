@@ -21,6 +21,7 @@ export default function AdminOrdersPage() {
   }, []);
 
   const orders = ordersList || [];
+  const submittedPayments = orders.filter((o: any) => o.paymentStatus === 'submitted');
   const pendingCount = orders.filter((o: any) => o.status === 'Pending').length;
 
   if (loading) {
@@ -41,24 +42,26 @@ export default function AdminOrdersPage() {
           {/* Bell Icon with Badge */}
           <div className="relative">
             <Bell className="w-6 h-6 text-[#c49a45]" />
-            {pendingCount > 0 && (
+            {(submittedPayments.length > 0 || pendingCount > 0) && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg shadow-red-500/50">
-                {pendingCount}
+                {submittedPayments.length || pendingCount}
               </span>
             )}
           </div>
 
           <div>
-            <span className="text-xs text-neutral-400 font-mono uppercase tracking-wider">Pending Orders</span>
-            <span className={`text-lg font-bold ml-3 ${pendingCount > 0 ? 'text-red-400' : 'text-[#c49a45]'}`}>
-              {pendingCount}
+            <span className="text-xs text-neutral-400 font-mono uppercase tracking-wider">Submitted Payment Proofs</span>
+            <span className={`text-lg font-bold ml-3 ${submittedPayments.length > 0 ? 'text-amber-400' : 'text-[#c49a45]'}`}>
+              {submittedPayments.length}
             </span>
           </div>
 
-          {pendingCount > 0 && (
-            <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/30 px-3 py-1 rounded-full">
-              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className="text-[10px] text-red-400 font-mono">{pendingCount} order{pendingCount > 1 ? 's' : ''} pending</span>
+          {submittedPayments.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+              <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+              <span className="text-[10px] text-amber-400 font-mono">
+                {submittedPayments.length} payment proof{submittedPayments.length > 1 ? 's' : ''} awaiting verification
+              </span>
             </div>
           )}
         </div>
@@ -70,13 +73,35 @@ export default function AdminOrdersPage() {
           </span>
           <button
             onClick={loadOrders}
-            className="flex items-center gap-1.5 text-[#c49a45] hover:text-white transition-colors px-3 py-1.5 border border-[#c49a45]/30 rounded hover:bg-[#c49a45]/10"
+            className="flex items-center gap-1.5 text-[#c49a45] hover:text-white transition-colors px-3 py-1.5 border border-[#c49a45]/30 rounded hover:bg-[#c49a45]/10 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
         </div>
       </div>
+
+      {/* Admin Payment Notifications List */}
+      {submittedPayments.length > 0 && (
+        <div className="space-y-2 mb-6">
+          {submittedPayments.map((ord: any) => (
+            <div
+              key={ord.id}
+              className="bg-amber-950/40 border border-amber-500/40 text-amber-200 px-4 py-3 rounded-lg text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-md animate-fade-in"
+            >
+              <div className="flex items-center gap-2 font-serif">
+                <Bell className="w-4 h-4 text-amber-400 animate-bounce flex-shrink-0" />
+                <span>
+                  <strong>New payment proof submitted for Order #HM-{ord.id}</strong> ({ord.customerName} — {ord.paymentType === 'advance_30' ? '30% Advance' : '100% Full'}).
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-amber-400 bg-amber-900/50 px-2 py-0.5 rounded border border-amber-700">
+                Awaiting Verification
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <AdminClient initialOrders={orders || []} />
     </div>

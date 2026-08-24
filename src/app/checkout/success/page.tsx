@@ -30,6 +30,97 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
+  const [newScreenshot, setNewScreenshot] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmittingProof, setIsSubmittingProof] = useState(false);
+  const [resubmitError, setResubmitError] = useState('');
+  const [resubmitSuccess, setResubmitSuccess] = useState('');
+
+  const handleResubmitFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+      setResubmitError('Invalid file format. Please upload a JPG, JPEG, PNG, or WEBP image.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setResubmitError('File size must be less than 10MB.');
+      return;
+    }
+
+    setResubmitError('');
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to upload image.');
+      }
+
+      setNewScreenshot(data.url);
+    } catch (err: any) {
+      setResubmitError(err.message || 'Failed to upload screenshot.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleResubmitPayment = async () => {
+    if (!newScreenshot) {
+      setResubmitError('Please select and upload a new payment screenshot first.');
+      return;
+    }
+
+    setIsSubmittingProof(true);
+    setResubmitError('');
+
+    try {
+      const res = await fetch('/api/orders/submit-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          paymentScreenshot: newScreenshot,
+          customerPhone: order.customerPhone,
+          customerEmail: order.customerEmail,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit payment proof.');
+      }
+
+      const updatedOrder = {
+        ...order,
+        paymentScreenshot: newScreenshot,
+        paymentStatus: 'submitted',
+        paymentRejectionReason: null,
+        status: 'Pending',
+      };
+      setOrder(updatedOrder);
+
+      setResubmitSuccess('New payment proof submitted successfully! Our team will verify it shortly.');
+      setNewScreenshot('');
+      setTimeout(() => setResubmitSuccess(''), 5000);
+    } catch (err: any) {
+      setResubmitError(err.message || 'Error submitting payment proof.');
+    } finally {
+      setIsSubmittingProof(false);
+    }
+  };
+
   const confirmDeleteMyOrder = async () => {
     if (!orderToDelete) return;
     setIsDeleting(true);
@@ -94,7 +185,6 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
           || allLocalOrders.find((o: any) => String(o.id) === String(orderIdStr) || String(o._id) === String(orderIdStr));
 
         if (!matched) {
-          // Fetch order from API if not in local storage
           try {
             const res = await fetch(`/api/orders?id=${encodeURIComponent(orderIdStr)}`);
             const data = await res.json();
@@ -107,7 +197,6 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
         }
       }
 
-      // Fallback to latest local order if no ID specified or not matched
       if (!matched && localMyOrders.length > 0) {
         matched = localMyOrders[0];
       }
@@ -120,7 +209,6 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
         }
       }
 
-      // Fetch user's order history by saved phone if available
       const userPhone = localStorage.getItem('humamanan_user_phone');
       if (userPhone) {
         try {
@@ -171,6 +259,16 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
     );
   }
 
+  // Payment calculation values
+  const orderTotal = Number(order.orderTotal || order.totalAmount || 0);
+  const payableAmt = order.payableAmount !== undefined && order.payableAmount !== null
+    ? Number(order.payableAmount)
+    : (order.paymentType === 'advance_30' ? Math.round(orderTotal * 0.3 * 100) / 100 : orderTotal);
+  const remainingAmt = order.remainingAmount !== undefined && order.remainingAmount !== null
+    ? Number(order.remainingAmount)
+    : (order.paymentType === 'advance_30' ? Math.round((orderTotal - payableAmt) * 100) / 100 : 0);
+  const payStatus = order.paymentStatus || 'pending';
+
   return (
     <div className="bg-[#faf9f6] min-h-screen py-16 px-4 sm:px-6 lg:px-8 animate-fade-in">
       <div className="max-w-4xl mx-auto space-y-12">
@@ -211,6 +309,172 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
               <span>Standard Transit: 15-20 Days</span>
             </div>
           </div>
+        </div>
+
+        {/* Payment Verification Callout Banner */}
+        <div className="bg-white border border-[#ebdcb9] rounded-lg p-6 space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-100 pb-4">
+            <div>
+              <h3 className="font-serif text-sm font-bold text-neutral-900 tracking-wider flex items-center gap-2">
+                <span>Payment Verification Status</span>
+              </h3>
+              <p className="text-xs text-neutral-500 mt-0.5 font-mono">
+                Method: {order.paymentMethod || 'Bank Transfer'}
+              </p>
+            </div>
+
+            {/* Visual Payment Status Pill */}
+            <span className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold tracking-wider uppercase flex items-center gap-2 ${
+              payStatus === 'verified'
+                ? 'bg-green-100 text-green-800 border border-green-300'
+                : payStatus === 'submitted'
+                ? 'bg-blue-100 text-blue-800 border border-blue-300 animate-pulse'
+                : payStatus === 'rejected'
+                ? 'bg-red-100 text-red-800 border border-red-300'
+                : 'bg-amber-100 text-amber-800 border border-amber-300'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${
+                payStatus === 'verified' ? 'bg-green-600' :
+                payStatus === 'submitted' ? 'bg-blue-600 animate-ping' :
+                payStatus === 'rejected' ? 'bg-red-600' : 'bg-amber-600'
+              }`} />
+              {payStatus === 'verified' && 'Verified'}
+              {payStatus === 'submitted' && 'Payment Submitted'}
+              {payStatus === 'rejected' && 'Rejected'}
+              {payStatus === 'pending' && 'Pending Proof'}
+            </span>
+          </div>
+
+          {/* Payment Details Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono bg-[#faf9f6] p-4 rounded border border-neutral-200/80">
+            <div>
+              <span className="text-[10px] text-neutral-400 block uppercase">Order Total</span>
+              <span className="font-bold text-neutral-900">{formatPrice(orderTotal, order.currency as 'PKR' | 'USD')}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-neutral-400 block uppercase">Payment Type</span>
+              <span className="font-bold text-[#c49a45] font-serif">
+                {order.paymentType === 'advance_30' ? '30% Advance' : '100% Full Payment'}
+              </span>
+            </div>
+            <div>
+              <span className="text-[10px] text-neutral-400 block uppercase">Amount Submitted / Paid</span>
+              <span className="font-bold text-green-700">{formatPrice(payableAmt, order.currency as 'PKR' | 'USD')}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-neutral-400 block uppercase">Remaining Amount</span>
+              <span className="font-bold text-neutral-700">{formatPrice(remainingAmt, order.currency as 'PKR' | 'USD')}</span>
+            </div>
+          </div>
+
+          {/* Rejection Handling & Resubmission Uploader */}
+          {payStatus === 'rejected' && (
+            <div className="p-5 bg-red-50/90 border border-red-200 rounded-md space-y-4 text-xs">
+              <div className="space-y-1">
+                <span className="font-serif font-bold text-red-800 text-sm flex items-center gap-2">
+                  ⚠️ Payment Proof Rejected by Admin
+                </span>
+                {order.paymentRejectionReason && (
+                  <div className="p-3 bg-white border border-red-200 rounded text-red-700 font-sans italic">
+                    Reason: &quot;{order.paymentRejectionReason}&quot;
+                  </div>
+                )}
+                <p className="text-neutral-600 pt-1 leading-relaxed">
+                  Please double check your bank transfer receipt and upload a fresh, clear screenshot below to re-submit for verification.
+                </p>
+              </div>
+
+              {/* Success Notification */}
+              {resubmitSuccess && (
+                <div className="p-3 bg-green-100 border border-green-300 text-green-800 rounded font-semibold flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span>{resubmitSuccess}</span>
+                </div>
+              )}
+
+              {/* Error Notification */}
+              {resubmitError && (
+                <div className="p-3 bg-red-100 border border-red-300 text-red-800 rounded font-medium">
+                  ✦ {resubmitError}
+                </div>
+              )}
+
+              {/* Resubmit Uploader Controls */}
+              <div className="bg-white p-4 rounded border border-red-200 space-y-3">
+                <label className="block text-[11px] font-semibold text-neutral-700 uppercase">
+                  Upload New Payment Screenshot
+                </label>
+
+                {!newScreenshot ? (
+                  <div>
+                    <input
+                      type="file"
+                      id="resubmitInput"
+                      accept="image/jpeg,image/png,image/webp,image/jpg"
+                      onChange={handleResubmitFileUpload}
+                      disabled={isUploading || isSubmittingProof}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="resubmitInput"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#c49a45] hover:bg-[#121212] text-white rounded text-xs font-serif font-bold uppercase tracking-wider transition-all cursor-pointer"
+                    >
+                      {isUploading ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Uploading Image...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          <span>Select Screenshot</span>
+                        </>
+                      )}
+                    </label>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <img src={newScreenshot} alt="New Proof Preview" className="w-16 h-16 object-cover rounded border border-neutral-300" />
+                      <div>
+                        <span className="text-xs text-green-700 font-semibold block">New Screenshot Uploaded</span>
+                        <button
+                          type="button"
+                          onClick={() => setNewScreenshot('')}
+                          className="text-[11px] text-red-600 underline font-serif hover:text-red-800"
+                        >
+                          Change Screenshot
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleResubmitPayment}
+                      disabled={isSubmittingProof}
+                      className="px-6 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded text-xs font-serif font-bold uppercase tracking-wider shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {isSubmittingProof ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Submitting...</span>
+                        </>
+                      ) : (
+                        <span>Re-submit Payment Proof</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Submitted / Awaiting Verification Alert */}
+          {payStatus === 'submitted' && (
+            <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded text-xs text-blue-900 font-serif leading-relaxed">
+              ✦ <strong>Payment Received:</strong> Your payment proof has been successfully submitted and is currently being verified by our finance department. We will confirm your order within a few hours.
+            </div>
+          )}
         </div>
 
         {/* Next Steps Timeline */}
@@ -259,9 +523,9 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
               <div className="w-8 h-8 rounded-full bg-neutral-200 text-neutral-700 flex items-center justify-center font-serif font-bold text-xs">
                 04
               </div>
-              <h3 className="font-serif text-xs uppercase tracking-widest text-neutral-800 font-bold">COD Dispatch</h3>
+              <h3 className="font-serif text-xs uppercase tracking-widest text-neutral-800 font-bold">Atelier Dispatch</h3>
               <p className="text-[11px] text-neutral-500 leading-relaxed">
-                Your luxury parcel goes through inspection, is sealed in a muslin garment bag, and delivered with Cash on Delivery free shipping.
+                Your luxury parcel goes through inspection, is sealed in a muslin garment bag, and dispatched via express courier.
               </p>
             </div>
 
@@ -328,7 +592,7 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
             </div>
 
             <div className="p-2 bg-[#ebdcb9]/20 text-[#856423] text-[9px] rounded font-serif text-center uppercase tracking-widest">
-              Payment Method: Cash On Delivery (COD)
+              Payment Method: {order.paymentMethod || 'Direct Bank Transfer'} ({order.paymentType === 'advance_30' ? '30% Advance' : '100% Full Payment'})
             </div>
           </div>
 

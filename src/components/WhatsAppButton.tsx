@@ -1,7 +1,8 @@
 // src/components/WhatsAppButton.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { MessageCircle, X } from 'lucide-react';
 
 interface WhatsAppButtonProps {
@@ -18,56 +19,10 @@ export default function WhatsAppButton({
     size = 'md',
 }: WhatsAppButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [isVisible, setIsVisible] = useState(true);
+    const pathname = usePathname();
 
     // Hide button on admin routes
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const pathname = window.location.pathname;
-            if (pathname.startsWith('/ad/m/in')) {
-                setIsVisible(false);
-            } else {
-                setIsVisible(true);
-            }
-        }
-    }, []);
-
-    // Listen for route changes (client-side navigation)
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-
-        const handleRouteChange = () => {
-            const pathname = window.location.pathname;
-            if (pathname.startsWith('/ad/m/in')) {
-                setIsVisible(false);
-            } else {
-                setIsVisible(true);
-            }
-        };
-
-        // Listen for popstate (back/forward)
-        window.addEventListener('popstate', handleRouteChange);
-
-        // Monkey-patch pushState and replaceState to detect navigation
-        const originalPushState = history.pushState;
-        const originalReplaceState = history.replaceState;
-
-        history.pushState = function (...args) {
-            originalPushState.apply(this, args);
-            handleRouteChange();
-        };
-
-        history.replaceState = function (...args) {
-            originalReplaceState.apply(this, args);
-            handleRouteChange();
-        };
-
-        return () => {
-            window.removeEventListener('popstate', handleRouteChange);
-            history.pushState = originalPushState;
-            history.replaceState = originalReplaceState;
-        };
-    }, []);
+    const isVisible = !pathname?.startsWith('/ad/m/in');
 
     const handleWhatsAppClick = () => {
         const encodedMessage = encodeURIComponent(message);
