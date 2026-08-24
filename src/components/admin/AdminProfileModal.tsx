@@ -46,7 +46,7 @@ export default function AdminProfileModal({
     phone: '+92 300 1234567',
     email: 'admin@humamanan.com',
     pass: 'AHM@@123',
-    address: 'Atelier 14, MM Alam Road, Gulberg III, Lahore, Pakistan',
+    address: 'Lahore, Gujrat, Pakistan',
   });
 
   // Editable form state
@@ -182,11 +182,10 @@ export default function AdminProfileModal({
             {/* Notification alert */}
             {notification && (
               <div
-                className={`p-4 rounded-xl border flex items-center gap-3 animate-fade-in ${
-                  notification.type === 'success'
+                className={`p-4 rounded-xl border flex items-center gap-3 animate-fade-in ${notification.type === 'success'
                     ? 'bg-green-950/40 border-green-500/40 text-green-200'
                     : 'bg-red-950/40 border-red-500/40 text-red-200'
-                }`}
+                  }`}
               >
                 {notification.type === 'success' ? (
                   <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />

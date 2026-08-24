@@ -15,11 +15,29 @@ function formatInspirationRow(row: any) {
   };
 }
 
-// GET - Fetch all inspirations
-export async function GET() {
+// GET - Fetch inspirations (with optional phone or id filter)
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const phone = searchParams.get('phone');
+
     await initDatabase();
-    const [rows]: any = await pool.query('SELECT * FROM inspirations ORDER BY created_at DESC');
+
+    let query = 'SELECT * FROM inspirations';
+    const params: any[] = [];
+
+    if (id) {
+      query += ' WHERE id = ?';
+      params.push(id);
+    } else if (phone) {
+      query += ' WHERE phone = ?';
+      params.push(phone);
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const [rows]: any = await pool.query(query, params);
     const inspirations = rows.map(formatInspirationRow);
 
     return NextResponse.json({

@@ -9,7 +9,7 @@ const DEFAULT_ADMIN = {
   phone: '+92 300 1234567',
   email: 'admin@humamanan.com',
   pass: 'AHM@@123',
-  address: 'Atelier 14, MM Alam Road, Gulberg III, Lahore, Pakistan'
+  address: 'Lahore, Gujrat, Pakistan'
 };
 
 // Helper to format MySQL admin row

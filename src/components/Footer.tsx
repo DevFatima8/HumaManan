@@ -37,8 +37,8 @@ export default function Footer() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-serif text-xs uppercase tracking-widest text-[#f2e6d0] font-semibold">Cash on Delivery</h4>
-              <p className="text-[11px] text-neutral-400 mt-0.5">COD checkout option available for immediate delivery within Pakistan.</p>
+              <h4 className="font-serif text-xs uppercase tracking-widest text-[#f2e6d0] font-semibold">Bank Transfer Options</h4>
+              <p className="text-[11px] text-neutral-400 mt-0.5">30% Advance or 100% Full Payment via Bank Transfer with express delivery.</p>
             </div>
           </div>
 
@@ -66,7 +66,7 @@ export default function Footer() {
               Inspired by the pure essence of timeless heritage. HUMA MANAN craft houses the most intricate bridal wear, formal maxis, and luxury sarees, designed with unmatched hand embellishments of traditional subcontinental karigari.
             </p>
             <div className="pt-2 text-xs text-[#c49a45] font-serif tracking-widest">
-              LAHORE • ISLAMABAD • DUBAI • NEW YORK
+              Lahore • Gujrat • Pakistan
             </div>
           </div>
 
@@ -89,11 +89,6 @@ export default function Footer() {
               <li>
                 <Link href="/category/Ready to Wear" className="text-neutral-400 hover:text-[#c49a45] transition-colors">
                   Ready to Wear
-                </Link>
-              </li>
-              <li>
-                <Link href="/ad/m/in" className="text-neutral-400 hover:text-[#c49a45] transition-colors">
-                  Client Order Tracking Portal
                 </Link>
               </li>
             </ul>
@@ -123,17 +118,17 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#c49a45] flex-shrink-0" />
                 <span className="text-neutral-400">
-                  92-C, DHA Phase 5, Lahore, Pakistan <br />
+                  Gujrat, Lahore <br />
                   <span className="text-[10px] text-neutral-500">(By Appointment Only)</span>
                 </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#c49a45] flex-shrink-0" />
-                <span className="text-neutral-400">+92 300 011 2233</span>
+                <span className="text-neutral-400">+92 313 5793337</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#c49a45] flex-shrink-0" />
-                <span className="text-neutral-400">contact@humamanan.com</span>
+                <span className="text-neutral-400">admin@humamanan.com</span>
               </li>
             </ul>
           </div>
@@ -143,11 +138,6 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-[#c49a45]/15 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-neutral-500 gap-4">
           <p>© {new Date().getFullYear()} HUMA MANAN Couture. All Rights Reserved.</p>
-          <div className="flex gap-6">
-            <Link href="/" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/ad/m/in" className="hover:text-white transition-colors">Management Portal</Link>
-          </div>
         </div>
       </div>
     </footer>

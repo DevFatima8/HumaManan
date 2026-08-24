@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import CartSidebar from "@/components/CartSidebar";
 import Footer from "@/components/Footer";
 import "./globals.css";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 // Let's configure custom metadata for humamanan Luxury Couture
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main className="flex-grow">{children}</main>
             <Footer />
             <CartSidebar />
+            <WhatsAppButton />
           </div>
         </StoreProvider>
       </body>

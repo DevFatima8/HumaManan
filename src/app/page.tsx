@@ -58,7 +58,7 @@ export default function HomePage() {
           {/* Kids */}
           <div className="relative h-96 group overflow-hidden rounded shadow-sm border border-[#ebdcb9]/40">
             <img
-              src="1 (1).jpeg"
+              src="kids.jpeg"
               alt="Kids Collection"
               className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-105"
             />
@@ -84,7 +84,7 @@ export default function HomePage() {
           {/* Men */}
           <div className="relative h-96 group overflow-hidden rounded shadow-sm border border-[#ebdcb9]/40">
             <img
-              src="1 (24).jpeg"
+              src="men.webp"
               alt="Men's Collection"
               className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-105"
             />

@@ -24,6 +24,24 @@ export default function AdminInspirationsPage() {
     const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+    const [inspirationToDelete, setInspirationToDelete] = useState<any | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
+    const confirmDeleteInspiration = async () => {
+        if (!inspirationToDelete) return;
+        setIsDeleting(true);
+        try {
+            await deleteInspiration(inspirationToDelete._id);
+            setSuccessMessage(`Inspiration submission from "${inspirationToDelete.name}" has been deleted.`);
+            setTimeout(() => setSuccessMessage(''), 4000);
+        } catch (error) {
+            console.error('Failed to delete inspiration:', error);
+        } finally {
+            setIsDeleting(false);
+            setInspirationToDelete(null);
+        }
+    };
 
     const loadData = useCallback(async () => {
         setLoading(true);
@@ -186,6 +204,14 @@ export default function AdminInspirationsPage() {
                 </div>
             </div>
 
+            {/* Success Notification */}
+            {successMessage && (
+                <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg text-xs font-semibold flex items-center gap-2 animate-bounce">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>{successMessage}</span>
+                </div>
+            )}
+
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="bg-white border border-[#ebdcb9]/40 rounded-lg p-4 flex items-center gap-4">
@@ -334,13 +360,10 @@ export default function AdminInspirationsPage() {
 
                                             {/* Delete Button */}
                                             <button
-                                                onClick={async () => {
-                                                    if (confirm(`Delete inspiration from ${inspiration.name}?`)) {
-                                                        await deleteInspiration(inspiration._id);
-                                                    }
-                                                }}
-                                                className="p-2 text-neutral-400 hover:text-red-600 transition-colors border border-neutral-200 rounded hover:border-red-300"
-                                                title="Delete"
+                                                type="button"
+                                                onClick={() => setInspirationToDelete(inspiration)}
+                                                className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 border border-neutral-200 hover:border-red-300 rounded transition-all cursor-pointer flex items-center justify-center"
+                                                title="Delete Inspiration"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -528,6 +551,91 @@ export default function AdminInspirationsPage() {
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {inspirationToDelete && (
+                <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+                    <div className="bg-white border border-[#ebdcb9] rounded-lg shadow-2xl max-w-md w-full p-6 relative space-y-5">
+                        {/* Close button */}
+                        <button
+                            onClick={() => !isDeleting && setInspirationToDelete(null)}
+                            disabled={isDeleting}
+                            className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {/* Header icon + text */}
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-red-50 text-red-600 rounded-full border border-red-100 flex-shrink-0">
+                                <Trash2 className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="font-serif text-lg font-bold text-neutral-900">
+                                    Delete Inspiration?
+                                </h3>
+                                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Are you sure you want to delete this client moodboard submission? This action is permanent and cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Inspiration Info Summary */}
+                        <div className="bg-neutral-50 border border-neutral-200/80 rounded-md p-3.5 space-y-1.5 text-xs text-neutral-700 font-mono">
+                            <div className="flex justify-between">
+                                <span className="text-neutral-500">Client Name:</span>
+                                <span className="font-bold text-neutral-800">{inspirationToDelete.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-neutral-500">Phone:</span>
+                                <span className="font-semibold text-neutral-800">{inspirationToDelete.phone}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-neutral-500">Images Uploaded:</span>
+                                <span className="font-bold text-[#c49a45]">
+                                    {inspirationToDelete.images?.length || 0} image(s)
+                                </span>
+                            </div>
+                            {inspirationToDelete.message && (
+                                <div className="pt-1 border-t border-neutral-200 text-[11px] text-neutral-600 italic truncate">
+                                    &quot;{inspirationToDelete.message}&quot;
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Action Buttons */}
+                        <div className="flex items-center justify-end gap-3 pt-2">
+                            <button
+                                type="button"
+                                disabled={isDeleting}
+                                onClick={() => setInspirationToDelete(null)}
+                                className="px-4 py-2 border border-neutral-300 rounded text-xs font-serif font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled={isDeleting}
+                                onClick={confirmDeleteInspiration}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-serif font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        <span>Deleting...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <span>Yes, Delete Inspiration</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

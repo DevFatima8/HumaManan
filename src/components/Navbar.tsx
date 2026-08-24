@@ -124,22 +124,17 @@ export default function Navbar() {
                 <Link
                   href="/ad/m/in"
                   className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/ad/m/in')
-                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                      : 'text-neutral-300'
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                     }`}
                 >
                   Dashboard
-                  {pendingOrdersCount > 0 && (
-                    <span className="bg-red-500 text-white text-[8px] sm:text-[9px] font-bold rounded-full px-1.5 sm:px-2 py-0.5 min-w-[16px] sm:min-w-[18px] text-center animate-pulse">
-                      {pendingOrdersCount}
-                    </span>
-                  )}
                 </Link>
                 <Link
                   href="/ad/m/in/orders"
                   className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/ad/m/in/orders')
-                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                      : 'text-neutral-300'
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                     }`}
                 >
                   Orders
@@ -152,8 +147,8 @@ export default function Navbar() {
                 <Link
                   href="/ad/m/in/products"
                   className={`hover:text-white transition-colors py-1 ${isActivePath('/ad/m/in/products')
-                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                      : 'text-neutral-300'
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                     }`}
                 >
                   Products
@@ -161,8 +156,8 @@ export default function Navbar() {
                 <Link
                   href="/ad/m/in/discounts"
                   className={`hover:text-white transition-colors py-1 ${isActivePath('/ad/m/in/discounts')
-                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                      : 'text-neutral-300'
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                     }`}
                 >
                   Discounts
@@ -170,8 +165,8 @@ export default function Navbar() {
                 <Link
                   href="/ad/m/in/inspirations"
                   className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${isActivePath('/ad/m/in/inspirations')
-                      ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
-                      : 'text-neutral-300'
+                    ? 'text-[#c49a45] border-b-2 border-[#c49a45]'
+                    : 'text-neutral-300'
                     }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -233,8 +228,8 @@ export default function Navbar() {
               <Link
                 href="/ad/m/in"
                 className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in')
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -252,8 +247,8 @@ export default function Navbar() {
               <Link
                 href="/ad/m/in/orders"
                 className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/orders')
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -271,8 +266,8 @@ export default function Navbar() {
               <Link
                 href="/ad/m/in/products"
                 className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/products')
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -283,8 +278,8 @@ export default function Navbar() {
               <Link
                 href="/ad/m/in/discounts"
                 className={`flex items-center gap-3 px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/discounts')
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -295,8 +290,8 @@ export default function Navbar() {
               <Link
                 href="/ad/m/in/inspirations"
                 className={`flex items-center justify-between px-3 py-3 rounded transition-colors ${isActivePath('/ad/m/in/inspirations')
-                    ? 'bg-[#c49a45]/20 text-[#c49a45]'
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#c49a45]/20 text-[#c49a45]'
+                  : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -567,23 +562,7 @@ export default function Navbar() {
               );
             })}
 
-            {/* Divider */}
-            <div className="border-t border-neutral-200 my-2" />
 
-            {/* Console Gateway Link */}
-            <Link
-              href="/ad/m/in/orders"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-2.5 px-3 rounded text-neutral-500 hover:bg-neutral-100 hover:text-black flex items-center gap-3 transition-colors"
-            >
-              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Console Gateway</span>
-              {pendingOrdersCount > 0 && (
-                <span className="bg-red-500 text-white text-[8px] font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center animate-pulse">
-                  {pendingOrdersCount}
-                </span>
-              )}
-            </Link>
 
             {/* Mobile Currency Section */}
             <div className="mt-2 pt-2 border-t border-neutral-200 px-3 py-2">

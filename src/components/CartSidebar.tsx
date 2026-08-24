@@ -191,7 +191,7 @@ export default function CartSidebar() {
                 onClick={() => setIsCartOpen(false)}
                 className="block w-full py-3.5 bg-[#c49a45] hover:bg-[#121212] text-[#faf9f6] hover:text-[#f2e6d0] text-center text-xs tracking-[0.2em] font-serif uppercase font-semibold transition-all duration-300 rounded shadow-md border border-[#c49a45] hover:border-[#121212]"
               >
-                Proceed to COD Checkout
+                Proceed to Checkout
               </Link>
               
               <button 

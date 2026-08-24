@@ -20,7 +20,7 @@ export interface CartItem {
 }
 
 export interface Order {
-  id: number;
+  id: number | string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -31,6 +31,16 @@ export interface Order {
   totalAmount: number;
   currency: 'PKR' | 'USD';
   paymentMethod: string;
+  paymentType?: 'advance_30' | 'full_100';
+  orderTotal?: number;
+  payableAmount?: number;
+  remainingAmount?: number;
+  paymentStatus?: 'pending' | 'submitted' | 'verified' | 'rejected';
+  paymentScreenshot?: string;
+  paymentSubmittedAt?: string | null;
+  paymentVerifiedAt?: string | null;
+  paymentRejectedAt?: string | null;
+  paymentRejectionReason?: string | null;
   status: string;
   items: any[];
   notes: string;
@@ -73,8 +83,9 @@ interface StoreContextType {
   deleteProduct: (id: string) => Promise<void>;
 
   ordersList: Order[];
-  addOrder: (order: Omit<Order, 'id'>) => number;
-  updateOrderStatus: (orderId: number, status: string) => void;
+  addOrder: (order: Omit<Order, 'id'>) => number | string;
+  updateOrderStatus: (orderId: number | string, status: string) => void;
+  deleteOrder: (orderId: number | string) => Promise<void>;
 
   discountsList: Discount[];
   addDiscount: (productId: string, percent: number) => Promise<void>;
@@ -102,17 +113,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [pendingInspirationsCount, setPendingInspirationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Fetch products from MongoDB
+  // Fetch products from API
   const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch('/api/products');
       const data = await response.json();
       if (data.success) {
-        // Map MongoDB _id to id for consistency
         const products = data.products.map((p: any) => ({
           ...p,
-          id: p._id, // Set id from _id
-          _id: p._id, // Keep _id as well
+          id: p._id,
+          _id: p._id,
         }));
         setProductsList(products);
       }
@@ -121,7 +131,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Fetch discounts from MongoDB
+  // Fetch discounts from API
   const fetchDiscounts = useCallback(async () => {
     try {
       const response = await fetch('/api/discounts');
@@ -134,7 +144,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Fetch inspirations from MongoDB
+  // Fetch inspirations from API
   const fetchInspirations = useCallback(async () => {
     try {
       const response = await fetch('/api/inspiration');
@@ -149,11 +159,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Fetch orders from MySQL API
+  const fetchOrders = useCallback(async () => {
+    try {
+      const response = await fetch('/api/orders');
+      const data = await response.json();
+      if (data.success && Array.isArray(data.orders)) {
+        setOrdersList(data.orders);
+        localStorage.setItem('humamanan_orders', JSON.stringify(data.orders));
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  }, []);
+
   const refreshData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([fetchProducts(), fetchDiscounts(), fetchInspirations()]);
+    await Promise.all([fetchProducts(), fetchDiscounts(), fetchInspirations(), fetchOrders()]);
     setLoading(false);
-  }, [fetchProducts, fetchDiscounts, fetchInspirations]);
+  }, [fetchProducts, fetchDiscounts, fetchInspirations, fetchOrders]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -356,7 +380,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   // ORDERS (keep localStorage for now, can migrate to MongoDB later)
   const addOrder = (orderData: Omit<Order, 'id'>) => {
-    const nextId = ordersList.length > 0 ? Math.max(...ordersList.map(o => o.id)) + 1 : 1001;
+    const numericIds = ordersList.map(o => typeof o.id === 'number' ? o.id : parseInt(String(o.id).replace(/\D/g, '')) || 0);
+    const nextId = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1001;
     const finalOrder: Order = { id: nextId, ...orderData };
     const updated = [finalOrder, ...ordersList];
     setOrdersList(updated);
@@ -364,11 +389,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return nextId;
   };
 
-  const updateOrderStatus = (orderId: number, status: string) => {
-    const updated = ordersList.map(o => o.id === orderId ? { ...o, status } : o);
+  const updateOrderStatus = (orderId: number | string, status: string) => {
+    const updated = ordersList.map(o => String(o.id) === String(orderId) ? { ...o, status } : o);
     setOrdersList(updated);
     localStorage.setItem('humamanan_orders', JSON.stringify(updated));
   };
+
+  const deleteOrder = useCallback(async (orderId: number | string) => {
+    try {
+      await fetch(`/api/orders?id=${orderId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Error deleting order via API:', error);
+    }
+    const updated = ordersList.filter(o => String(o.id) !== String(orderId));
+    setOrdersList(updated);
+    localStorage.setItem('humamanan_orders', JSON.stringify(updated));
+  }, [ordersList]);
 
   return (
     <StoreContext.Provider value={{
@@ -392,6 +430,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ordersList,
       addOrder,
       updateOrderStatus,
+      deleteOrder,
 
       discountsList,
       addDiscount,
