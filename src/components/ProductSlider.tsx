@@ -121,8 +121,8 @@ export default function ProductSlider({ products }: ProductSliderProps) {
 
             {/* Main Slider - Full Screen Style Like Clothing Brands */}
             <div className="relative w-full bg-[#0a0a0a] overflow-hidden">
-                {/* Full Height Image Container - Responsive heights */}
-                <div className="relative w-full min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] xl:min-h-[90vh] bg-neutral-900">
+                {/* Fixed Height Image Container - Prevents layout shift across image transitions */}
+                <div className="relative w-full h-[170vh] sm:h-[150vh] md:h-[170vh] lg:h-[160vh] xl:h-[170vh] bg-neutral-900 overflow-hidden">
 
                     {/* Slide Wrapper with Transition */}
                     <div
@@ -130,7 +130,7 @@ export default function ProductSlider({ products }: ProductSliderProps) {
                         onTransitionStart={handleTransitionStart}
                         onTransitionEnd={handleTransitionEnd}
                     >
-                        {/* Main Image - Full width, full height with object-contain */}
+                        {/* Main Image - Full width, full height with object-cover */}
                         <Link
                             href={`/product/${productId}`}
                             className="block w-full h-full cursor-pointer"
@@ -138,8 +138,7 @@ export default function ProductSlider({ products }: ProductSliderProps) {
                             <img
                                 src={currentProduct.images[0]}
                                 alt={currentProduct.name}
-                                className="w-full h-full object-contain bg-[#0a0a0a]"
-                                style={{ minHeight: '60vh' }}
+                                className="w-full h-full object-cover object-center bg-[#0a0a0a]"
                             />
                         </Link>
 
@@ -220,8 +219,8 @@ export default function ProductSlider({ products }: ProductSliderProps) {
                                         key={idx}
                                         onClick={() => goToSlide(idx)}
                                         className={`transition-all duration-300 ${isActive
-                                                ? `w-4 sm:w-5 md:w-6 lg:w-8 h-1.5 sm:h-2 rounded-full ${dotColor} shadow-lg shadow-${dotColor}/30`
-                                                : `w-1.5 sm:w-2 md:w-2.5 h-1.5 sm:h-2 rounded-full ${dotColor}/30 hover:${dotColor}/60`
+                                            ? `w-4 sm:w-5 md:w-6 lg:w-8 h-1.5 sm:h-2 rounded-full ${dotColor} shadow-lg shadow-${dotColor}/30`
+                                            : `w-1.5 sm:w-2 md:w-2.5 h-1.5 sm:h-2 rounded-full ${dotColor}/30 hover:${dotColor}/60`
                                             }`}
                                         aria-label={`Go to slide ${idx + 1}`}
                                         disabled={isTransitioning}
